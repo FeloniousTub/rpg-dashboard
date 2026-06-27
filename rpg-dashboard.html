@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPG Reference Guide</title>
+<style>
+  :root{--bg-primary:#ffffff;--bg-secondary:#f5f5f3;--bg-tertiary:#eeece8;--text-primary:#1a1a18;--text-secondary:#6b6a66;--text-tertiary:#9e9d99;--border-light:rgba(0,0,0,0.10);--border-med:rgba(0,0,0,0.18);--radius-md:8px;--radius-lg:12px;--bg-danger:#fcebeb;--text-danger:#a32d2d;--bg-success:#eaf3de;--text-success:#3b6d11;--bg-info:#e6f1fb;--text-info:#185fa5;--bg-warning:#faeeda;--text-warning:#854f0b;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg-tertiary);color:var(--text-primary);padding:1.5rem;}
+  h1{font-size:20px;font-weight:500;margin-bottom:0.25rem;}
+  .subtitle{font-size:13px;color:var(--text-secondary);margin-bottom:1.25rem;}
+  .tabs{display:flex;gap:4px;margin-bottom:1rem;flex-wrap:wrap;}
+  .tab{padding:6px 14px;font-size:13px;border:0.5px solid var(--border-med);border-radius:var(--radius-md);cursor:pointer;background:var(--bg-primary);color:var(--text-secondary);}
+  .tab.active{background:var(--bg-secondary);color:var(--text-primary);font-weight:500;border-color:rgba(0,0,0,0.3);}
+  .section{display:none;}.section.active{display:block;}
+  .stitle{font-size:15px;font-weight:500;margin:1.25rem 0 .75rem;padding-bottom:.4rem;border-bottom:0.5px solid var(--border-med);}
+  .stitle:first-child{margin-top:0;}
+  .g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:10px;}
+  .g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:10px;}
+  .card{background:var(--bg-primary);border:0.5px solid var(--border-light);border-radius:var(--radius-lg);padding:.875rem 1rem;}
+  .srow{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12px;border-bottom:0.5px solid var(--border-light);}
+  .srow:last-child{border-bottom:none;}.slabel{color:var(--text-secondary);}
+  .pip{width:7px;height:7px;border-radius:2px;background:#d3d1c7;display:inline-block;margin-right:2px;}
+  .hp-badge{background:var(--bg-danger);color:var(--text-danger);font-size:11px;padding:1px 7px;border-radius:99px;font-weight:500;}
+  .sabox{margin-top:10px;background:var(--bg-secondary);border-radius:var(--radius-md);padding:8px 10px;font-size:12px;}
+  .sabox .lbl{font-size:10px;font-weight:500;color:var(--text-secondary);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em;}
+  .sabox.on-cd{background:var(--bg-danger);}.sabox.on-cd .lbl{color:var(--text-danger);}
+  .ttag{display:inline-block;font-size:10px;padding:2px 6px;border-radius:99px;margin-top:6px;}
+  .stat-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .pill{display:inline-flex;align-items:center;gap:5px;background:var(--bg-secondary);border-radius:var(--radius-md);padding:5px 12px;font-size:13px;color:var(--text-secondary);}
+  .pill b{color:var(--text-primary);font-weight:500;}
+  .itbl{width:100%;font-size:13px;border-collapse:collapse;}
+  .itbl th{text-align:left;padding:6px 8px;font-weight:500;color:var(--text-secondary);font-size:12px;border-bottom:0.5px solid var(--border-med);}
+  .itbl td{padding:5px 8px;border-bottom:0.5px solid var(--border-light);}
+  .itbl tr:last-child td{border-bottom:none;}
+  .bdg{display:inline-block;font-size:10px;padding:1px 6px;border-radius:99px;font-weight:500;}
+  .bsp{background:#eeedfe;color:#3c3489;}.bwp{background:#faece7;color:#993c1d;}.bap{background:#eaf3de;color:#3b6d11;}
+  .mapgrid{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;margin-top:.5rem;}
+  .mc{aspect-ratio:1;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;}
+  .td{background:#faeeda;color:#854f0b;}.tp{background:#eaf3de;color:#3b6d11;}.ti{background:#e6f1fb;color:#185fa5;}
+  .ts{background:#eeedfe;color:#3c3489;}.tm{background:#d3d1c7;color:#444441;}.top{background:var(--bg-secondary);color:var(--text-tertiary);border:0.5px solid var(--border-light);}
+  .cur-main{outline:2px solid #e24b4a;outline-offset:-1px;font-weight:700;}
+  .cur-solo{outline:2px solid #BA7517;outline-offset:-1px;font-weight:700;}
+  .mleg{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+  .mleg-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-secondary);}
+  .mleg-dot{width:12px;height:12px;border-radius:2px;}
+  .frow{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;}
+  .fbtn{padding:4px 10px;font-size:12px;border:0.5px solid var(--border-med);border-radius:var(--radius-md);cursor:pointer;background:var(--bg-primary);color:var(--text-secondary);}
+  .fbtn.active{background:var(--bg-info);color:var(--text-info);border-color:#b5d4f4;}
+  .mtbl{width:100%;font-size:11px;border-collapse:collapse;}
+  .mtbl th{text-align:center;padding:5px 4px;font-weight:500;color:var(--text-secondary);border-bottom:0.5px solid var(--border-med);white-space:nowrap;}
+  .mtbl th.tl{text-align:left;}.mtbl td{padding:4px 4px;border-bottom:0.5px solid var(--border-light);text-align:center;}
+  .mtbl td.tl{text-align:left;font-size:12px;}.mtbl tr:last-child td{border-bottom:none;}
+  .lvlh{background:var(--bg-secondary);font-size:10px;}
+  .notebox{background:var(--bg-warning);color:var(--text-warning);border-radius:var(--radius-md);padding:8px 12px;font-size:12px;margin-top:10px;line-height:1.8;}
+  .vtbl{width:100%;font-size:12px;border-collapse:collapse;}
+  .vtbl th{text-align:left;padding:6px 8px;font-weight:500;color:var(--text-secondary);border-bottom:0.5px solid var(--border-med);white-space:nowrap;font-size:11px;}
+  .vtbl td{padding:5px 8px;border-bottom:0.5px solid var(--border-light);vertical-align:top;}.vtbl tr:last-child td{border-bottom:none;}
+  .cur-veh td{background:var(--bg-success);color:var(--text-success);}
+  .ctbl{width:100%;font-size:12px;border-collapse:collapse;margin-bottom:1rem;}
+  .ctbl th{text-align:center;padding:6px;font-weight:500;color:var(--text-secondary);border-bottom:0.5px solid var(--border-med);}
+  .ctbl th.tl{text-align:left;}.ctbl td{padding:5px 6px;border-bottom:0.5px solid var(--border-light);text-align:center;}
+  .ctbl td.tl{text-align:left;font-weight:500;}.ctbl tr:last-child td{border-bottom:none;}
+  .formula{background:var(--bg-secondary);border-radius:var(--radius-md);padding:8px 12px;font-family:monospace;font-size:13px;margin-top:6px;}
+  .rc{background:var(--bg-primary);border:0.5px solid var(--border-light);border-radius:var(--radius-lg);padding:.875rem 1rem;}
+  .rtitle{font-size:13px;font-weight:500;margin-bottom:5px;}
+  .rbody{font-size:13px;color:var(--text-secondary);line-height:1.6;}.rbody b{color:var(--text-primary);font-weight:500;}
+  .hint{font-size:11px;color:var(--text-secondary);margin-top:6px;}.tbl-wrap{overflow-x:auto;}
+  .ibox{margin-top:6px;border-radius:6px;padding:6px 8px;font-size:12px;}
+  .ibox-weapon{background:#eaf3de;color:#3b6d11;}.ibox-armor{background:#e6f1fb;color:#185fa5;}.ibox-none{background:#f5f5f3;color:#6b6a66;}
+  .ibox-label{font-size:10px;font-weight:600;letter-spacing:.04em;opacity:.7;margin-bottom:1px;}
+  .ibox-detail{font-size:11px;opacity:.8;margin-top:2px;}
+  .warnbox{background:var(--bg-warning);color:var(--text-warning);border-radius:var(--radius-md);padding:8px 12px;font-size:12px;margin-bottom:10px;line-height:1.7;}
+  .enc-banner{background:#fcebeb;color:#a32d2d;border:1px solid #f0b8b8;border-radius:var(--radius-md);padding:10px 14px;font-size:13px;margin-bottom:10px;font-weight:500;}
+  .xp-badge{background:#eeedfe;color:#3c3489;font-size:11px;padding:1px 7px;border-radius:99px;font-weight:500;}
+  .seat-tbl{width:100%;font-size:13px;border-collapse:collapse;background:var(--bg-primary);border-radius:var(--radius-lg);overflow:hidden;border:.5px solid var(--border-light);}
+  .seat-tbl th{padding:8px;font-weight:500;color:var(--text-secondary);font-size:11px;text-align:left;background:var(--bg-secondary);}
+  .seat-tbl td{padding:7px 8px;border-top:.5px solid var(--border-light);}
+  .beast-stat-tbl{width:100%;font-size:12px;border-collapse:collapse;min-width:480px;}
+  .beast-stat-tbl th{padding:6px 8px;font-weight:500;color:var(--text-secondary);border-bottom:.5px solid var(--border-med);text-align:center;}
+  .beast-stat-tbl th.tl{text-align:left;}
+  .beast-stat-tbl td{padding:5px 8px;border-bottom:.5px solid var(--border-light);text-align:center;}
+  .beast-stat-tbl td.tl{text-align:left;color:var(--text-secondary);}
+  .beast-stat-tbl tr:last-child td{border-bottom:none;}.beast-stat-tbl tr:nth-child(even){background:var(--bg-secondary);}
+  .ability-grid{margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;}
+  .ab{border-radius:var(--radius-md);padding:8px 10px;font-size:12px;}
+  .ab-lbl{font-size:10px;font-weight:600;letter-spacing:.04em;margin-bottom:4px;}
+  .weak-grid{margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .boss-badge{background:#a32d2d;color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:600;margin-left:6px;}
+</style>
+</head>
+<body>
+<h1>RPG Reference Guide</h1>
+<p class="subtitle" id="subtitle"></p>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('party',this)">Party</button>
+  <button class="tab" onclick="showTab('status',this)">Status</button>
+  <button class="tab" onclick="showTab('mapTab',this)">Map</button>
+  <button class="tab" onclick="showTab('classes',this)">Classes</button>
+  <button class="tab" onclick="showTab('combat',this)">Combat</button>
+  <button class="tab" onclick="showTab('market',this)">Market</button>
+  <button class="tab" onclick="showTab('vehicles',this)">Vehicles</button>
+  <button class="tab" onclick="showTab('bestiary',this)">Bestiary</button>
+</div>
+<div id="party" class="section active"></div>
+<div id="status" class="section"></div>
+<div id="mapTab" class="section">
+  <p id="map-player-legend" style="font-size:13px;color:var(--text-secondary);margin-bottom:8px"></p>
+  <div class="mapgrid" id="mapgrid"></div>
+  <div class="mleg">
+    <div class="mleg-item"><div class="mleg-dot" style="background:#faeeda"></div>Desert (D)</div>
+    <div class="mleg-item"><div class="mleg-dot" style="background:#eaf3de"></div>Plains (P)</div>
+    <div class="mleg-item"><div class="mleg-dot" style="background:#e6f1fb"></div>Island (I)</div>
+    <div class="mleg-item"><div class="mleg-dot" style="background:#eeedfe"></div>Swamp (S)</div>
+    <div class="mleg-item"><div class="mleg-dot" style="background:#d3d1c7"></div>Mountain (M)</div>
+    <div class="mleg-item"><div class="mleg-dot" style="background:#f0eeea;border:.5px solid #ccc"></div>Outer Place (OP)</div>
+    <div class="mleg-item"><div class="mleg-dot" style="outline:2px solid #e24b4a;"></div>Vehicle</div>
+    <div class="mleg-item"><div class="mleg-dot" style="outline:2px solid #BA7517;"></div>Solo player</div>
+  </div>
+  <p class="hint" style="margin-top:10px">Mob spawn: 35% in terrain | 50% in OP. All players who hit a creature share the loot.</p>
+</div>
+<div id="classes" class="section">
+  <div class="stitle">Full stats comparison</div>
+  <div class="tbl-wrap"><table class="ctbl">
+    <thead><tr><th class="tl">Class</th><th>SPD</th><th>STR</th><th>ATK</th><th>DEF</th><th>REGEN</th><th>HP</th><th>Wpn bonus</th><th class="tl">Terrain bonus</th></tr></thead>
+    <tbody>
+      <tr><td class="tl">Kvothe Storyteller</td><td>2</td><td>4</td><td>2</td><td>2</td><td>4</td><td><span class="hp-badge">125</span></td><td>+2</td><td class="tl" style="color:var(--text-secondary)">Alone in terrain: +2 STR</td></tr>
+      <tr><td class="tl">Unsullied Warrior</td><td>1</td><td>3</td><td>3</td><td>3</td><td>2</td><td><span class="hp-badge">225</span></td><td>+3</td><td class="tl" style="color:var(--text-secondary)">Desert: +2 ATK</td></tr>
+      <tr><td class="tl">Nahri Healer</td><td>2</td><td>1</td><td>1</td><td>1</td><td>12</td><td><span class="hp-badge">60</span></td><td>-</td><td class="tl" style="color:var(--text-secondary)">Island: +1 Regen to all party members in Island terrain (healer must also be in Island; same quadrant not required)</td></tr>
+      <tr><td class="tl">Hobbit Adventurer</td><td>3</td><td>1</td><td>2</td><td>2</td><td>4</td><td><span class="hp-badge">150</span></td><td>-</td><td class="tl" style="color:var(--text-secondary)">Mountain: +1 Speed</td></tr>
+    </tbody>
+  </table></div>
+  <div class="stitle">Special abilities</div>
+  <div class="g2">
+    <div class="card"><div class="rtitle">Kingkiller - Marzen</div><div class="rbody">Handheld weapon <b>+25</b> for 1 turn. Cooldown: <b>5 turns</b>.</div></div>
+    <div class="card"><div class="rtitle">Unique Eunuch - Rakuyo</div><div class="rbody">Weapon and Attack <b>+5</b> for 2 turns. Cooldown: <b>5 turns</b>.</div></div>
+    <div class="card"><div class="rtitle">Waterproof Bandaid - Inked</div><div class="rbody">Heals party to <b>full HP</b>. Exception: any player on <b>Island terrain</b> is only healed to <b>half HP</b>. Cannot be used <b>during combat</b>. CD: <b>8 turns</b>.</div></div>
+    <div class="card"><div class="rtitle">My Precious - CannonFodder</div><div class="rbody">Invisibility + Move speed <b>+1</b> for 2 turns. CD: <b>4 turns</b>. Only works if opponent has not yet seen you.</div></div>
+  </div>
+</div>
+<div id="combat" class="section">
+  <div class="stitle">Heal vs Regeneration</div>
+  <div class="g2">
+    <div class="rc"><div class="rtitle">Regeneration (passive)</div><div class="rbody">The <b>Regen</b> stat triggers at the <b>end of every turn</b>, after all actions including creature attacks.</div></div>
+    <div class="rc"><div class="rtitle">Heal spells (active)</div><div class="rbody">Heal spells activate <b>on the caster's turn</b>, before end-of-turn regeneration. Provides immediate HP recovery mid-round.</div></div>
+  </div>
+  <div class="stitle">Damage formulas</div>
+  <div class="g2">
+    <div class="card"><div class="rtitle">Weapon damage</div><div class="formula">(Strength + Attack) x Weapon + bonuses</div></div>
+    <div class="card"><div class="rtitle">Spell damage</div><div class="formula">Attack x Spell damage + bonuses</div></div>
+  </div>
+  <div class="stitle">Key mechanics</div>
+  <div class="g2">
+    <div class="rc"><div class="rtitle">Defence &amp; regen</div><div class="rbody">Take <b>25 damage</b> -> Defence 5 reduces to <b>20</b> -> End-of-turn Regen 5 reduces net to <b>15</b>.</div></div>
+    <div class="rc"><div class="rtitle">Turn order</div><div class="rbody">Randomised each round. Creatures attack <b>after</b> all players. Each turn = one Earth day. Specials available from <b>turn 1</b>.</div></div>
+    <div class="rc"><div class="rtitle">Lineup</div><div class="rbody">Runs <b>left to right</b>. Position 1 can only hit opposing position 1 unless you have range. Larger lineup can attack unmatched opponents. Area damage ignores lineup.</div></div>
+    <div class="rc"><div class="rtitle">Hands &amp; weapons</div><div class="rbody">You have <b>2 hands</b>. Most weapons use 1 hand - can pair with a shield or spell. Can hold <b>2 spells</b>. Only <b>attack with 1 hand per turn</b>. Most items have 3 levels.</div></div>
+    <div class="rc"><div class="rtitle">Boss creatures</div><div class="rbody">You get <b>1 full turn to flee</b> before a boss attacks. Encountering one early? Running is wise.</div></div>
+    <div class="rc"><div class="rtitle">Creature spawning</div><div class="rbody">Mob spawn: <b>35%</b> main terrain | <b>50%</b> OP. No new mobs spawn mid-battle, but wanderers from unfinished battles can arrive.</div></div>
+    <div class="rc"><div class="rtitle">Player death</div><div class="rbody">Dead players still plan with team. Final blow earns <b>1 item of choice + 250 XP x enemy level</b>. All other items vanish. <b>Coins &amp; quest items cannot be looted.</b></div></div>
+    <div class="rc"><div class="rtitle">Team leader</div><div class="rbody">Communicates moves to admin. Provides a stat boost nearby. On death: <b>no new leader</b> - dead leader still manages admin comms.</div></div>
+  </div>
+</div>
+<div id="market" class="section">
+  <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">Level 1 available now | Level 2 unlocks at player level 3 | Level 3 unlocks on hidden trigger. Must be in same quadrant to access. Coins are shared.</p>
+  <div class="frow">
+    <button class="fbtn active" onclick="filterMkt('all',this)">All</button>
+    <button class="fbtn" onclick="filterMkt('Weapon',this)">Weapon</button>
+    <button class="fbtn" onclick="filterMkt('Weapon Support',this)">Support</button>
+    <button class="fbtn" onclick="filterMkt('Armor',this)">Armor</button>
+    <button class="fbtn" onclick="filterMkt('Clothing',this)">Clothing</button>
+    <button class="fbtn" onclick="filterMkt('Potion',this)">Potion</button>
+    <button class="fbtn" onclick="filterMkt('Gear',this)">Gear</button>
+  </div>
+  <div class="tbl-wrap"><table class="mtbl">
+    <thead>
+      <tr><th class="tl">Item</th><th class="tl">Cat</th><th colspan="3" class="lvlh">Level 1</th><th colspan="3" class="lvlh">Level 2</th><th colspan="3" class="lvlh">Level 3</th></tr>
+      <tr><th class="tl"></th><th class="tl"></th><th>Sell</th><th>Buy</th><th>DMG/DEF</th><th>Sell</th><th>Buy</th><th>DMG/DEF</th><th>Sell</th><th>Buy</th><th>DMG/DEF</th></tr>
+    </thead>
+    <tbody id="mktbody"></tbody>
+  </table></div>
+  <div class="notebox">* Traps hit only position #1 in lineup<br>** Grenades hit the whole party - damage reduced by lineup position<br>^ Bombs do not damage players or creatures<br>E = price per unit | (n) = units per pack | - = not available at this level</div>
+  <div style="margin-top:1rem">
+    <div class="stitle">Vehicle upgrades</div>
+    <table class="itbl">
+      <thead><tr><th>Upgrade</th><th>Buy price</th></tr></thead>
+      <tbody><tr><td>GPS</td><td>3,000</td></tr><tr><td>CD Player</td><td>2,500</td></tr><tr><td>Spinning Rims</td><td>2,500</td></tr><tr><td>Jumper Cables of Destiny</td><td>5,000</td></tr><tr><td>Bulletproof Windows</td><td>2,000</td></tr></tbody>
+    </table>
+    <p class="hint">Upgrades permanently attach to vehicle. Vehicles have no sell value and cannot be stolen.</p>
+  </div>
+</div>
+<div id="vehicles" class="section">
+  <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Current vehicle highlighted in green. Upgrades permanently attach - no sell value, cannot be stolen.</p>
+  <div class="tbl-wrap"><table class="vtbl">
+    <thead><tr><th>Vehicle</th><th>DEF</th><th>SPD</th><th>Cost</th><th>Buffs / Terrain</th><th>Boosts</th><th>Notes</th></tr></thead>
+    <tbody id="vbody"></tbody>
+  </table></div>
+</div>
+<div id="bestiary" class="section"></div>
+<script>
+// =============================================================
+//  GAME STATE — UPDATE THIS BLOCK EACH DAY
+//  Everything else is render engine — do not edit below GS
+// =============================================================
+const GS = {
+
+  // META
+  coins: 250,
+  quest: 'Museum Day 0/13',
+  // encounter: set to { title, desc } when active, else null
+  encounter: null,
+
+  // VEHICLE
+  vehicle: {
+    name: '2002 Honda Civic (Blue)',
+    location: 'D5',
+    upgrades: [],        // e.g. ['GPS', 'CD Player']
+  },
+
+  // PLAYERS
+  // vehicleSeat: null = on foot | 'Driver front' | 'Passenger front' | etc
+  // sa.cdLeft: turns remaining. 0 = ready
+  // equipped.weapon / armor: null if nothing equipped
+  players: [
+    {
+      name: 'Marzen', class: 'Kvothe Storyteller', color: '#7F77DD',
+      hp: 125, hpMax: 125, xp: 0, level: 1,
+      location: 'D1', vehicleSeat: null,
+      bonusNote: 'Alone in Desert D1 · +2 STR active',
+      bonusStyle: 'background:#eaf3de;color:#3b6d11',
+      equipped: {
+        weapon: { name: 'Spear', lvl: 1, qual: 1, stat: 'DMG 4' },
+        armor: null,
+      },
+      sa: { name: 'Kingkiller', desc: 'Handheld weapon +25 for 1 turn', cdTotal: 5, cdLeft: 0 },
+    },
+    {
+      name: 'Rakuyo', class: 'Unsullied Warrior', color: '#1D9E75',
+      hp: 225, hpMax: 225, xp: 50, level: 1,
+      location: 'D5', vehicleSeat: 'Passenger front',
+      bonusNote: 'Desert terrain bonus: +2 ATK',
+      bonusStyle: 'background:#faeeda;color:#854f0b',
+      equipped: {
+        weapon: { name: 'Axe-Single Blade', lvl: 1, qual: 1, stat: 'DMG 5' },
+        armor: null,
+      },
+      sa: { name: 'Unique Eunuch', desc: 'Weapon & Attack +5 for 2 turns', cdTotal: 5, cdLeft: 0 },
+    },
+    {
+      name: 'Inked', class: 'Nahri Healer', color: '#D85A30',
+      hp: 60, hpMax: 60, xp: 0, level: 1,
+      location: 'D5', vehicleSeat: 'Driver front',
+      bonusNote: 'Island: +1 Regen to party (see Classes tab)',
+      bonusStyle: 'background:#e6f1fb;color:#185fa5',
+      equipped: {
+        weapon: null,
+        armor: { name: 'Boots', lvl: 1, qual: 1, stat: 'DEF 2', note: 'Prevents flood damage (33% per level)' },
+      },
+      sa: { name: 'Waterproof Bandaid', desc: 'Heal party to full HP — except players on Island terrain healed to half. Not usable in combat.', cdTotal: 8, cdLeft: 0 },
+    },
+    {
+      name: 'CannonFodder', class: 'Hobbit Adventurer', color: '#BA7517',
+      hp: 150, hpMax: 150, xp: 0, level: 1,
+      location: 'D9', vehicleSeat: null,
+      bonusNote: 'Mountain +1 Speed',
+      bonusStyle: 'background:#d3d1c7;color:#444441',
+      equipped: {
+        weapon: null,
+        armor: null,
+      },
+      sa: { name: 'My Precious', desc: 'Invisibility + Move +1 for 2 turns', cdTotal: 4, cdLeft: 2 },
+    },
+  ],
+
+  // TEAM INVENTORY (unequipped)
+  // cat: 'WEAPON' | 'ARMOR' | 'SPELL' | 'GEAR' | 'POTION'
+  teamInventory: [
+    { cat: 'SPELL',  name: 'Lightning',      lvl: 1, qual: 1, stat: 'DMG 7', note: '' },
+    { cat: 'WEAPON', name: 'Bow',            lvl: 2, qual: 1, stat: '—',     note: 'Requires arrows/bolts' },
+    { cat: 'WEAPON', name: 'Brass Knuckles', lvl: 1, qual: 1, stat: 'DMG 2', note: '' },
+  ],
+
+  // BESTIARY
+  // terrain: 'Desert'|'Plains'|'Island'|'Swamp'|'Mountain'|'Outer Place'
+  // stats: arrays of 5 values (LVL 1-5), use null for unknown levels
+  // abilities: [{ label, desc, danger: bool }]
+  // strong / weak: null or HTML string e.g. 'Axe <b>(+4 damage)</b>'
+  bestiary: [
+    {
+      emoji: '🐪', name: 'Camel', boss: false,
+      desc: 'Middle Eastern horse. Mean and spitty. Will judge you for carrying weak-ass weapons.',
+      terrain: 'Desert', mob: '1-2',
+      stats: { ATK:[2,4,6,8,10], STR:[8,16,24,32,40], DEF:[12,24,36,48,60], HP:[125,250,375,500,625] },
+      abilities: [
+        { label:'WEAPON — LVL 1+', desc:'Uses a weapon attack', danger:false },
+        { label:'DEBUFF — LVL 3+', desc:'Applies a debuff on hit', danger:true },
+        { label:'SPIT BLIND — LVL 4+', desc:'DEF reduced by <b>10</b> for <b>3 turns</b>', danger:true },
+      ],
+      strong: null, weak: null,
+    },
+    {
+      emoji: '🐺', name: 'Grey Wolf', boss: false,
+      desc: 'Think of a dog on steroids. Howls at the moon. Likes cheese. Loves Stephen King.',
+      terrain: 'Mountain', mob: '1-4',
+      stats: { ATK:[6,12,18,24,30], STR:[4,8,12,16,20], DEF:[6,12,18,24,30], HP:[55,110,165,220,275] },
+      abilities: [
+        { label:'WEAPON — LVL 1', desc:'Uses a weapon attack', danger:false },
+        { label:'NO SPECIAL — LVL 2', desc:'No additional ability', danger:false },
+        { label:'DEBUFF — LVL 3+', desc:'Applies a debuff on hit', danger:true },
+      ],
+      strong: null, weak: 'Axe <b>(+4 damage)</b>',
+    },
+    {
+      emoji: '🦦', name: 'Otter', boss: false,
+      desc: 'These cute and playful scamps will charm your pants off, and then bite you in your naughty spot.',
+      terrain: 'Swamp', mob: '3-5',
+      stats: { ATK:[2,4,6,8,10], STR:[3,6,9,12,15], DEF:[5,10,15,20,25], HP:[30,60,90,120,150] },
+      abilities: [
+        { label:'WEAPON — LVL 1+', desc:'Uses a weapon attack', danger:false },
+        { label:'DEBUFF — LVL 3+', desc:'Applies a debuff on hit', danger:true },
+      ],
+      strong: null, weak: 'Acid Rain <b>(+6 damage)</b>',
+    },
+    {
+      emoji: '🐟', name: 'Stingray', boss: false,
+      desc: 'Will sting without asking questions, especially if you call him Ray.',
+      terrain: 'Island', mob: '4-7',
+      stats: { ATK:[3,6,9,12,15], STR:[3,6,9,12,15], DEF:[4,8,12,16,20], HP:[35,70,105,140,175] },
+      abilities: [
+        { label:'WEAPON — LVL 1+', desc:'Uses a weapon attack', danger:false },
+        { label:'DEBUFF — LVL 3+', desc:'Applies a debuff on hit', danger:true },
+        { label:'SPIT BLIND — LVL 4+', desc:'DEF reduced by <b>10</b> for <b>3 turns</b>', danger:true },
+      ],
+      strong: null, weak: 'Spear <b>(+10 damage)</b>',
+    },
+    {
+      emoji: '👹', name: 'Bunyip', boss: true,
+      desc: 'Translates to "Devil Spirit". Known for its terrifying roar, disfigured shape, and love of plaid.',
+      terrain: 'Swamp', mob: '1',
+      stats: { ATK:[null,null,null,null,35], STR:[null,null,null,null,55], DEF:[null,null,null,null,60], HP:[null,null,null,null,850] },
+      abilities: [
+        { label:'WEAPON — LVL 1', desc:'Uses a weapon attack', danger:false },
+        { label:'ROAR — LVL 2', desc:'Unknown effect', danger:true },
+        { label:'DEBUFF — LVL 3+', desc:'Applies a debuff on hit', danger:true },
+        { label:'FEAR — LVL 4+', desc:'15% fear effect per level', danger:true },
+      ],
+      strong: null, weak: 'Spear <b>(+10 damage)</b>',
+    },
+  ],
+};
+// =============================================================
+//  END OF GAME STATE
+// =============================================================
+
+
+// --- STATIC DATA (never changes) ---
+
+const TERRAIN_STYLE = {
+  'Desert':      { bg:'#faeeda', color:'#854f0b' },
+  'Plains':      { bg:'#eaf3de', color:'#3b6d11' },
+  'Island':      { bg:'#e6f1fb', color:'#185fa5' },
+  'Swamp':       { bg:'#eeedfe', color:'#3c3489' },
+  'Mountain':    { bg:'#d3d1c7', color:'#444441' },
+  'Outer Place': { bg:'#f5f5f3', color:'#6b6a66' },
+};
+
+const CLASS_STATS = {
+  'Kvothe Storyteller': { spd:2, str:4, atk:2, def:2, regen:4,  wpn:'+2' },
+  'Unsullied Warrior':  { spd:1, str:3, atk:3, def:3, regen:2,  wpn:'+3' },
+  'Nahri Healer':       { spd:2, str:1, atk:1, def:1, regen:12, wpn:null },
+  'Hobbit Adventurer':  { spd:3, str:1, atk:2, def:2, regen:4,  wpn:null },
+};
+
+const VEHICLES = [
+  { name:'2002 Honda Civic (Blue)', def:7,   spd:1,  cost:'—',         buffs:'—',                            boosts:'—',                  notes:'No upgrades available' },
+  { name:'Golfcart',               def:1,   spd:1,  cost:'750',        buffs:'+1 Speed in OP terrain',       boosts:'—',                  notes:'No swamp · No upgrades' },
+  { name:'1968 Chevy Camaro',      def:4,   spd:3,  cost:'2,000',      buffs:'—',                            boosts:'+1 Speed on Plains', notes:'—' },
+  { name:'2024 Tesla Cybertruck',  def:10,  spd:2,  cost:'2,500',      buffs:'50% loss of turn in Swamp',    boosts:'+1 Speed on Desert', notes:'—' },
+  { name:'1915 Model T',           def:4,   spd:1,  cost:'3,000',      buffs:'-1 Speed all terrain',         boosts:'Damage +5',          notes:'Boost applies to all party in same quadrant' },
+  { name:'DeLorean',               def:8,   spd:2,  cost:'4,000',      buffs:'—',                            boosts:'—',                  notes:'Teleport to any square · 5 turn cooldown' },
+  { name:'1995 US Army Humvee',    def:15,  spd:2,  cost:'5,000',      buffs:'50% loss of turn in Mountains',boosts:'—',                  notes:'—' },
+  { name:'Batman921-Mobile',       def:20,  spd:3,  cost:'15,000',     buffs:'—',                            boosts:'Boost to base stats',notes:'Comes with additional items (TBC)' },
+  { name:'Millenium Falcon',       def:500, spd:10, cost:'1,000,000',  buffs:'—',                            boosts:'—',                  notes:'Invisibility · CD: 2 · Duration: 2' },
+];
+
+const MARKET = [
+  ['Spear','Weapon',5,7,4,12,25,8,20,35,12],
+  ['Brass Knuckles','Weapon',5,8,2,10,15,4,12,20,7],
+  ['Axe Single Blade','Weapon',10,13,5,30,50,9,50,75,13],
+  ['Bow','Weapon',5,10,'—',10,20,3,20,35,5],
+  ['Halberd','Weapon',10,25,4,25,50,9,75,130,15],
+  ['Knife','Weapon',5,8,2,7,10,5,13,20,9],
+  ['Sling','Weapon',5,10,'—',12,15,'—',20,35,'—'],
+  ['Crossbow','Weapon',25,75,'—',60,150,'—',100,250,'—'],
+  ['Traps*','Weapon','—',150,'50*','—',250,'75*','—',500,'125*'],
+  ['Bombs^','Weapon','N/A','N/A','N/A','N/A','N/A','N/A','N/A','N/A','N/A'],
+  ['Grenades**','Weapon','—','—','—',50,65,'25**',80,125,'50**'],
+  ['Warhammer','Weapon','—','—','—',60,110,15,275,575,33],
+  ['Lightsaber','Weapon','—','—','—',400,1000,80,400,1000,80],
+  ['Arrow','Weapon Support','1E','50(15)',1,'2E','75(15)',2,'4E','125(15)',4],
+  ['Fire Arrow','Weapon Support','3E','—',3,'6E','—',6,'9E','500(20)',9],
+  ['Rocks','Weapon Support','3E','50(10)',2,'5E','100(10)',5,'8E','150(10)',8],
+  ['Maui Rocks','Weapon Support','4E','75(10)',2,'9E','150(10)',7,'15E','225(10)',12],
+  ['Bolts','Weapon Support','10E','100(6)',5,'15E','150(6)',12,'25E','250(6)',17],
+  ['Frost Bolts','Weapon Support','8E','—',8,'20E','500(20)',15,'30E','—',30],
+  ['Helmet','Armor',15,20,3,30,40,6,45,60,9],
+  ['Shield','Armor',22,30,5,44,60,10,66,90,15],
+  ['Chest Plate','Armor',18,25,4,27,38,8,36,50,12],
+  ['Boots','Armor',10,20,2,20,40,4,40,80,6],
+  ['Leg Bracers','Armor',15,30,4,30,60,8,45,90,12],
+  ['Bread & Plastic Knife','Gear',0,150,0,0,0,0,0,0,0],
+  ['Cloak','Clothing','—','—','—','—','—','—',500,1250,5],
+  ['Ring of Mystery','Clothing','—','—','—','—','—','—','—',1000,0],
+  ['Ring of Unknown Origin','Clothing','—','—','—','—','—','—','—',1000,0],
+  ['Ring of Sour Milk Smell','Clothing','—','—','—','—','—','—','—',1000,0],
+  ['Ring of Luck or Despair','Clothing','—','—','—','—','—','—','—',1000,0],
+  ['Strength Potion','Potion','—','—','—','—','—','—','—',750,0],
+  ['Fire Resistance Potion','Potion','—','—','—','—','—','—','—',750,0],
+  ['Attack Potion','Potion','—','—','—','—','—','—','—',750,0],
+  ['Poison Potion','Potion','—','—','—','—','—','—','—',750,0],
+  ['Weakness Potion','Potion','—','—','—','—','—','—','—',750,0],
+];
+
+const MAP_DATA = [
+  ['D1','D2','D3','OP1','OP2','OP3','P1','P2','P3'],
+  ['D4','D5','D6','OP4','OP5','OP6','P4','P5','P6'],
+  ['D7','D8','D9','OP7','OP8','OP9','P7','P8','P9'],
+  ['OP10','OP11','OP12','I1','I2','I3','OP13','OP14','OP15'],
+  ['OP16','OP17','OP18','I4','I5','I6','OP19','OP20','OP21'],
+  ['OP22','OP23','OP24','I7','I8','I9','OP25','OP26','OP27'],
+  ['S1','S2','S3','OP28','OP29','OP30','M1','M2','M3'],
+  ['S4','S5','S6','OP31','OP32','OP33','M4','M5','M6'],
+  ['S7','S8','S9','OP34','OP35','OP36','M7','M8','M9'],
+];
+
+// --- HELPERS ---
+
+function pips(n, color) {
+  if (n === null) return '<span style="color:var(--text-tertiary)">-</span>';
+  if (n > 4) return `<span style="font-weight:500;color:${color}">${n}</span>`;
+  let h = '';
+  for (let i = 0; i < 4; i++) h += `<span class="pip"${i < n ? ` style="background:${color}"` : ''}></span>`;
+  return h;
+}
+
+function terrainCls(cell) {
+  if (/^D\d/.test(cell)) return 'td';
+  if (/^P\d/.test(cell)) return 'tp';
+  if (/^I\d/.test(cell)) return 'ti';
+  if (/^S\d/.test(cell)) return 'ts';
+  if (/^M\d/.test(cell)) return 'tm';
+  return 'top';
+}
+
+function catBadge(cat) {
+  const m = { SPELL:'bsp', WEAPON:'bwp', ARMOR:'bap', GEAR:'bsp', POTION:'bap' };
+  return `<span class="bdg ${m[cat]||'bsp'}">${cat}</span>`;
+}
+
+function banner() {
+  if (GS.encounter) {
+    return `<div class="enc-banner">⚔ <b>${GS.encounter.title}</b> — ${GS.encounter.desc}</div>`;
+  }
+  const locs = [...new Set(GS.players.map(p => p.location))];
+  if (locs.length > 1) {
+    const desc = GS.players.map(p => {
+      const seat = p.vehicleSeat ? `(${p.vehicleSeat})` : '(on foot)';
+      return `${p.name}: ${p.location} ${seat}`;
+    }).join(' · ');
+    return `<div class="warnbox">⚠ <b>Party is split!</b> ${desc}</div>`;
+  }
+  return '';
+}
+
+// --- RENDERERS ---
+
+function renderParty() {
+  let html = banner() + '<div class="g4">';
+  GS.players.forEach(p => {
+    const s = CLASS_STATS[p.class];
+    const c = p.color;
+    const inVeh = p.vehicleSeat;
+    const locPill = inVeh
+      ? `<div style="margin-top:4px;background:#e6f1fb;border-radius:6px;padding:4px 8px;font-size:11px;color:#185fa5">🚗 ${GS.vehicle.name} · ${p.vehicleSeat} · ${p.location}</div>`
+      : `<div style="margin-top:4px;background:#fcebeb;border-radius:6px;padding:4px 8px;font-size:11px;color:#a32d2d">🚶 On foot · ${p.location}</div>`;
+    let eqHtml = '';
+    if (p.equipped.weapon) eqHtml += `<div class="ibox ibox-weapon"><div class="ibox-label">⚔ WEAPON — EQUIPPED</div><div><b>${p.equipped.weapon.name}</b></div><div class="ibox-detail">LVL ${p.equipped.weapon.lvl} · QUAL ${p.equipped.weapon.qual} · ${p.equipped.weapon.stat}</div></div>`;
+    if (p.equipped.armor) {
+      const n = p.equipped.armor.note ? ` · ${p.equipped.armor.note}` : '';
+      eqHtml += `<div class="ibox ibox-armor"><div class="ibox-label">🛡 ARMOR — EQUIPPED</div><div><b>${p.equipped.armor.name}</b></div><div class="ibox-detail">LVL ${p.equipped.armor.lvl} · QUAL ${p.equipped.armor.qual} · ${p.equipped.armor.stat}${n}</div></div>`;
+    }
+    if (!p.equipped.weapon && !p.equipped.armor) eqHtml = `<div class="ibox ibox-none" style="margin-top:8px"><div class="ibox-label">NO ITEM EQUIPPED</div></div>`;
+    const onCd = p.sa.cdLeft > 0;
+    const saLbl = onCd ? `Special — ${p.sa.name} · ⏳ ON COOLDOWN` : `Special — ${p.sa.name}`;
+    const saStatus = onCd
+      ? `<div style="color:var(--text-danger);font-size:11px;margin-top:2px;font-weight:500">${p.sa.cdLeft} turn${p.sa.cdLeft!==1?'s':''} remaining</div>`
+      : `<div style="color:var(--text-secondary);font-size:11px;margin-top:2px">CD: ${p.sa.cdTotal} turns · ✅ Ready</div>`;
+    const wpnDisplay = s.wpn ? `<span style="font-weight:500">${s.wpn}</span>` : `<span style="color:var(--text-secondary)">—</span>`;
+    html += `<div class="card" style="border-top:3px solid ${c}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div style="font-size:15px;font-weight:500">${p.name}</div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">${p.class}</div></div>
+        <span class="xp-badge">XP ${p.xp}</span>
+      </div>
+      <div class="srow"><span class="slabel">HP</span><span class="hp-badge">${p.hp} / ${p.hpMax}</span></div>
+      <div class="srow"><span class="slabel">Speed</span><span>${pips(s.spd,c)}</span></div>
+      <div class="srow"><span class="slabel">Strength</span><span>${pips(s.str,c)}</span></div>
+      <div class="srow"><span class="slabel">Attack</span><span>${pips(s.atk,c)}</span></div>
+      <div class="srow"><span class="slabel">Defence</span><span>${pips(s.def,c)}</span></div>
+      <div class="srow"><span class="slabel">Regen</span><span>${pips(s.regen,c)}</span></div>
+      <div class="srow"><span class="slabel">Weapon bonus</span>${wpnDisplay}</div>
+      <span class="ttag" style="${p.bonusStyle}">${p.bonusNote}</span>
+      ${eqHtml}${locPill}
+      <div class="${onCd?'sabox on-cd':'sabox'}"><div class="lbl">${saLbl}</div><div>${p.sa.desc}</div>${saStatus}</div>
+    </div>`;
+  });
+  html += '</div>';
+  document.getElementById('party').innerHTML = html;
+}
+
+function renderStatus() {
+  const upgStr = GS.vehicle.upgrades.length ? GS.vehicle.upgrades.join(', ') : 'None';
+  const playerRows = GS.players.map(p => {
+    const cdCell = p.sa.cdLeft > 0
+      ? `<td style="color:var(--text-danger)">⏳ ${p.sa.cdLeft} turns</td>`
+      : `<td style="color:var(--text-success)">Ready</td>`;
+    const vehCell = p.vehicleSeat
+      ? `<td style="color:var(--text-success)">✓ ${p.vehicleSeat}</td>`
+      : `<td style="color:var(--text-danger)">✗ On foot</td>`;
+    const parts = [];
+    if (p.equipped.weapon) parts.push(`<span class="bdg bwp">WEAPON</span> ${p.equipped.weapon.name} L${p.equipped.weapon.lvl}`);
+    if (p.equipped.armor)  parts.push(`<span class="bdg bap">ARMOR</span> ${p.equipped.armor.name} L${p.equipped.armor.lvl}`);
+    const eqCell = parts.length ? `<td>${parts.join('<br>')}</td>` : `<td style="color:var(--text-secondary)">—</td>`;
+    return `<tr><td><b>${p.name}</b> <span style="color:var(--text-secondary);font-size:11px">${p.class.split(' ')[0]}</span></td><td>${p.xp}</td><td>${p.level}</td><td>${p.hp}/${p.hpMax}</td>${cdCell}<td>${p.location}</td>${vehCell}${eqCell}</tr>`;
+  }).join('');
+  const invRows = GS.teamInventory.length
+    ? GS.teamInventory.map(i => `<tr><td>${catBadge(i.cat)}</td><td>${i.name}</td><td>${i.lvl}</td><td>${i.qual}</td><td>${i.stat}</td><td style="color:var(--text-secondary);font-size:11px">${i.note}</td></tr>`).join('')
+    : `<tr><td colspan="6" style="color:var(--text-secondary);padding:10px 8px">No unequipped items</td></tr>`;
+  document.getElementById('status').innerHTML = `${banner()}
+    <div class="stat-pills">
+      <div class="pill">Coins: <b>${GS.coins.toLocaleString()}</b></div>
+      <div class="pill">Vehicle: <b>${GS.vehicle.name} · ${GS.vehicle.location}</b></div>
+      <div class="pill">Upgrades: <b>${upgStr}</b></div>
+      <div class="pill">Quest: <b>${GS.quest}</b></div>
+    </div>
+    <div class="stitle">Player status</div>
+    <table class="seat-tbl"><thead><tr><th>Player</th><th>XP</th><th>LVL</th><th>HP</th><th>SA Cooldown</th><th>Location</th><th>In Vehicle</th><th>Equipped</th></tr></thead><tbody>${playerRows}</tbody></table>
+    <div class="stitle">Team inventory — unequipped</div>
+    <table class="itbl"><thead><tr><th>Cat</th><th>Item</th><th>LVL</th><th>QUAL</th><th>DMG / DEF</th><th>Notes</th></tr></thead><tbody>${invRows}</tbody></table>
+    <p class="hint">Items exist in individual inventories. Trade only when in the same quadrant, before end of turn.</p>`;
+}
+
+function renderMap() {
+  const cellGroups = {};
+  GS.players.forEach(p => {
+    const hasVeh = GS.players.some(q => q.location === p.location && q.vehicleSeat);
+    if (hasVeh && p.vehicleSeat) cellGroups[p.location] = 'main';
+    else if (!cellGroups[p.location]) cellGroups[p.location] = 'solo';
+  });
+  const mg = document.getElementById('mapgrid');
+  mg.innerHTML = '';
+  MAP_DATA.forEach(row => row.forEach(cell => {
+    const d = document.createElement('div');
+    const extra = cellGroups[cell] === 'main' ? ' cur-main' : cellGroups[cell] === 'solo' ? ' cur-solo' : '';
+    d.className = 'mc ' + terrainCls(cell) + extra;
+    d.textContent = cell;
+    mg.appendChild(d);
+  }));
+  const groups = {};
+  GS.players.forEach(p => { if (!groups[p.location]) groups[p.location] = []; groups[p.location].push(p.name); });
+  const legendHtml = Object.entries(groups).map(([loc, names]) => {
+    const hasVeh = GS.players.some(p => p.location === loc && p.vehicleSeat);
+    const oc = hasVeh ? '#e24b4a' : '#BA7517';
+    return `<span style="outline:2px solid ${oc};padding:1px 5px;border-radius:3px;font-weight:700">${loc}</span> ${names.join(' + ')}`;
+  }).join(' &nbsp; ');
+  document.getElementById('map-player-legend').innerHTML = legendHtml;
+}
+
+function renderBestiary() {
+  const lvlColors = ['#7F77DD','#1D9E75','#D85A30','#BA7517','#a32d2d'];
+  let html = `<p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">${GS.bestiary.length} creatures discovered · <span style="color:#a32d2d;font-weight:500">Boss</span> encounters give 1 full turn to flee before attacking.</p>`;
+  GS.bestiary.forEach(b => {
+    const ts = TERRAIN_STYLE[b.terrain] || { bg:'#f5f5f3', color:'#6b6a66' };
+    const border = b.boss ? '#a32d2d' : ts.color;
+    const bossLabel = b.boss ? ' <span class="boss-badge">BOSS</span>' : '';
+    const bossTag = b.boss
+      ? `<span class="ttag" style="background:#fcebeb;color:#a32d2d">⚠ Boss — flee turn available</span>`
+      : `<span class="ttag" style="background:#eaf3de;color:#3b6d11">Not a boss</span>`;
+    const statRows = Object.entries(b.stats).map(([k, vals]) => {
+      const allNull = vals.slice(0,4).every(v => v === null);
+      if (allNull) return `<tr><td class="tl">${k}</td><td colspan="4" style="color:var(--text-tertiary);font-style:italic">Unknown</td><td>${vals[4]??'?'}</td></tr>`;
+      return `<tr><td class="tl">${k}</td>${vals.map(v => `<td>${v===null?'?':v}</td>`).join('')}</tr>`;
+    }).join('');
+    const abHtml = b.abilities.map(a => {
+      const s = a.danger ? 'background:var(--bg-danger);color:var(--text-danger)' : 'background:var(--bg-secondary)';
+      const ls = a.danger ? '' : 'color:var(--text-secondary)';
+      return `<div class="ab" style="${s}"><div class="ab-lbl" style="${ls}">${a.label}</div>${a.desc}</div>`;
+    }).join('');
+    const sw = (label, val) => val
+      ? `<div class="ab" style="background:var(--bg-danger);color:var(--text-danger)"><div class="ab-lbl">${label}</div>${val}</div>`
+      : `<div class="ab" style="background:var(--bg-secondary)"><div class="ab-lbl" style="color:var(--text-secondary)">${label}</div><span style="color:var(--text-tertiary)">Unknown</span></div>`;
+    html += `<div class="card" style="border-top:3px solid ${border};margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+        <div><div style="font-size:15px;font-weight:500">${b.emoji} ${b.name}${bossLabel}</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;font-style:italic">${b.desc}</div></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+          <span class="ttag" style="background:${ts.bg};color:${ts.color}">${b.terrain}</span>
+          <span class="ttag" style="background:#f5f5f3;color:#6b6a66">Mob: ${b.mob}</span>
+          ${bossTag}
+        </div>
+      </div>
+      <div style="margin-top:12px;overflow-x:auto"><table class="beast-stat-tbl">
+        <thead><tr style="background:var(--bg-secondary)"><th class="tl">Stat</th>${lvlColors.map((c,i)=>`<th style="color:${c}">LVL ${i+1}</th>`).join('')}</tr></thead>
+        <tbody>${statRows}</tbody>
+      </table></div>
+      <div class="ability-grid">${abHtml}</div>
+      <div class="weak-grid" style="margin-top:8px">${sw('STRONG AGAINST',b.strong)}${sw('WEAK AGAINST',b.weak)}</div>
+    </div>`;
+  });
+  document.getElementById('bestiary').innerHTML = html;
+}
+
+function renderVehicles() {
+  document.getElementById('vbody').innerHTML = VEHICLES.map(v => {
+    const cur = v.name === GS.vehicle.name;
+    return `<tr${cur?' class="cur-veh"':''}><td>${cur?`<b>${v.name} ★</b>`:v.name}</td><td>${v.def}</td><td>${v.spd}</td><td>${v.cost}</td><td>${v.buffs}</td><td>${v.boosts}</td><td>${v.notes}</td></tr>`;
+  }).join('');
+}
+
+function renderSubtitle() {
+  const locs = [...new Set(GS.players.map(p => p.location))];
+  const note = locs.length > 1 ? `⚠ Party split — ${locs.join(' · ')}` : `All at ${locs[0]}`;
+  document.getElementById('subtitle').innerHTML = `Team: ${GS.players.map(p=>p.name).join(' · ')} &nbsp;|&nbsp; ${note}`;
+}
+
+// --- MARKET FILTER ---
+let curFilter = 'all';
+function filterMkt(cat, el) {
+  curFilter = cat;
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderMkt();
+}
+function renderMkt() {
+  const f = curFilter === 'all' ? MARKET : MARKET.filter(i => i[1] === curFilter);
+  document.getElementById('mktbody').innerHTML = f.map(i =>
+    `<tr><td class="tl">${i[0]}</td><td class="tl" style="color:var(--text-secondary);font-size:11px">${i[1]}</td><td>${i[2]}</td><td>${i[3]}</td><td>${i[4]}</td><td>${i[5]}</td><td>${i[6]}</td><td>${i[7]}</td><td>${i[8]}</td><td>${i[9]}</td><td>${i[10]}</td></tr>`
+  ).join('');
+}
+
+// --- TAB SWITCH ---
+function showTab(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+
+// --- INIT ---
+renderSubtitle();
+renderParty();
+renderStatus();
+renderMap();
+renderBestiary();
+renderVehicles();
+renderMkt();
+</script>
+</body>
+</html>
