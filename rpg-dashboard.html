@@ -209,7 +209,7 @@ const GS = {
   coins: 250,
   quest: 'Museum Day 0/13',
   // encounter: set to { title, desc } when active, else null
-  encounter: null,
+  encounter: { title: 'Roadrunners spotted — D1 (not yet engaged)', desc: '3× Roadrunner LVL 2 (HP 80 each) in D1 with Marzen. Lineup positions: 1, 2, 3. Combat not yet started.' },
 
   // VEHICLE
   vehicle: {
@@ -298,6 +298,17 @@ const GS = {
         { label:'SPIT BLIND — LVL 4+', desc:'DEF reduced by <b>10</b> for <b>3 turns</b>', danger:true },
       ],
       strong: null, weak: null,
+    },
+    {
+      emoji: '🐦', name: 'Roadrunner', boss: false,
+      desc: 'Meep meep. He runs and runs like Forest Gump. Looks like someone stretched a chicken by the neck.',
+      terrain: 'Desert', mob: '3-6',
+      stats: { ATK:[3,6,9,12,15], STR:[2,4,6,8,10], DEF:[4,8,12,16,20], HP:[40,80,120,160,200] },
+      abilities: [
+        { label:'WEAPON — LVL 1+', desc:'Uses a weapon attack', danger:false },
+        { label:'DEBUFF — LVL 3+', desc:'Applies a debuff on hit', danger:true },
+      ],
+      strong: 'Grenades <b>(-20 damage)</b>', weak: 'Rocks <b>(+3 damage)</b>',
     },
     {
       emoji: '🐺', name: 'Grey Wolf', boss: false,
