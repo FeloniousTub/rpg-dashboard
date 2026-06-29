@@ -117,7 +117,11 @@
     <div class="mleg-item"><div class="mleg-dot" style="background:#f0eeea;border:.5px solid #ccc"></div>Outer Place (OP)</div>
     <div class="mleg-item"><div class="mleg-dot" style="outline:2px solid #e24b4a;"></div>Vehicle</div>
     <div class="mleg-item"><div class="mleg-dot" style="outline:2px solid #BA7517;"></div>Solo player</div>
+    <div class="mleg-item"><span style="font-size:12px">🏪</span> Market</div>
+    <div class="mleg-item"><span style="font-size:12px">⚰️</span> Crypt</div>
+    <div class="mleg-item"><span style="font-size:12px">⛪</span> Monastery</div>
   </div>
+  <div id="map-poi-list" style="margin-top:10px"></div>
   <p class="hint" style="margin-top:10px">Mob spawn: 35% in terrain | 50% in OP. All players who hit a creature share the loot.</p>
 </div>
 <div id="classes" class="section">
@@ -210,6 +214,11 @@ const GS = {
   quest: 'Museum Day 0/13',
   // encounter: set to { title, desc } when active, else null
   encounter: { title: 'Combat — Roadrunners × 3 · D1 · Market Found!', desc: '3× Roadrunner LVL 2. Lineup 1: <b>HP 48/80</b> · Lineup 2: HP 80/80 · Lineup 3: HP 80/80. Market discovered at D1.' },
+
+  // POINTS OF INTEREST (discovered locations)
+  pois: [
+    { location: 'D1', name: 'Market', emoji: '🏪', note: 'Buy/sell items. Must be in same quadrant to access.' },
+  ],
 
   // VEHICLE
   vehicle: {
@@ -579,15 +588,35 @@ function renderMap() {
     if (hasVeh && p.vehicleSeat) cellGroups[p.location] = 'main';
     else if (!cellGroups[p.location]) cellGroups[p.location] = 'solo';
   });
+  const poiMap = {};
+  GS.pois.forEach(p => { poiMap[p.location] = p; });
   const mg = document.getElementById('mapgrid');
   mg.innerHTML = '';
   MAP_DATA.forEach(row => row.forEach(cell => {
     const d = document.createElement('div');
     const extra = cellGroups[cell] === 'main' ? ' cur-main' : cellGroups[cell] === 'solo' ? ' cur-solo' : '';
     d.className = 'mc ' + terrainCls(cell) + extra;
-    d.textContent = cell;
+    d.style.flexDirection = 'column';
+    d.style.gap = '1px';
+    if (poiMap[cell]) {
+      const icon = document.createElement('span');
+      icon.style.fontSize = '12px';
+      icon.title = poiMap[cell].name;
+      icon.textContent = poiMap[cell].emoji;
+      d.appendChild(icon);
+    }
+    const lbl = document.createElement('span');
+    lbl.textContent = cell;
+    d.appendChild(lbl);
     mg.appendChild(d);
   }));
+  const poiListHtml = GS.pois.length
+    ? '<div class="stitle">Points of interest</div>' + GS.pois.map(p =>
+        `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border-light);font-size:13px"><span style="font-size:16px">${p.emoji}</span><span style="font-weight:500">${p.name}</span><span style="color:var(--text-secondary);font-size:12px">${p.location}</span>${p.note ? `<span style="color:var(--text-secondary);font-size:12px">— ${p.note}</span>` : ''}</div>`
+      ).join('')
+    : '';
+  document.getElementById('map-poi-list').innerHTML = poiListHtml;
+
   const groups = {};
   GS.players.forEach(p => { if (!groups[p.location]) groups[p.location] = []; groups[p.location].push(p.name); });
   const legendHtml = Object.entries(groups).map(([loc, names]) => {
