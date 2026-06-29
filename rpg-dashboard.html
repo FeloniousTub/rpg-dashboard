@@ -209,12 +209,12 @@ const GS = {
   coins: 250,
   quest: 'Museum Day 0/13',
   // encounter: set to { title, desc } when active, else null
-  encounter: { title: 'Roadrunners spotted — D1 (not yet engaged)', desc: '3× Roadrunner LVL 2 (HP 80 each) in D1 with Marzen. Lineup positions: 1, 2, 3. Combat not yet started.' },
+  encounter: { title: 'Combat — Roadrunners × 3 · D1 · Market Found!', desc: '3× Roadrunner LVL 2. Lineup 1: <b>HP 48/80</b> · Lineup 2: HP 80/80 · Lineup 3: HP 80/80. Market discovered at D1.' },
 
   // VEHICLE
   vehicle: {
     name: '2002 Honda Civic (Blue)',
-    location: 'D5',
+    location: 'D1',
     upgrades: [],        // e.g. ['GPS', 'CD Player']
   },
 
@@ -225,20 +225,20 @@ const GS = {
   players: [
     {
       name: 'Marzen', class: 'Kvothe Storyteller', color: '#7F77DD',
-      hp: 125, hpMax: 125, xp: 0, level: 1,
+      hp: 101, hpMax: 125, xp: 0, level: 1,
       location: 'D1', vehicleSeat: null,
-      bonusNote: 'Alone in Desert D1 · +2 STR active',
-      bonusStyle: 'background:#eaf3de;color:#3b6d11',
+      bonusNote: 'Desert D1 · Kingkiller used this turn',
+      bonusStyle: 'background:#faeeda;color:#854f0b',
       equipped: {
         weapon: { name: 'Spear', lvl: 1, qual: 1, stat: 'DMG 4' },
         armor: null,
       },
-      sa: { name: 'Kingkiller', desc: 'Handheld weapon +25 for 1 turn', cdTotal: 5, cdLeft: 0 },
+      sa: { name: 'Kingkiller', desc: 'Handheld weapon +25 for 1 turn', cdTotal: 5, cdLeft: 5 },
     },
     {
       name: 'Rakuyo', class: 'Unsullied Warrior', color: '#1D9E75',
       hp: 225, hpMax: 225, xp: 50, level: 1,
-      location: 'D5', vehicleSeat: 'Passenger front',
+      location: 'D1', vehicleSeat: 'Passenger front',
       bonusNote: 'Desert terrain bonus: +2 ATK',
       bonusStyle: 'background:#faeeda;color:#854f0b',
       equipped: {
@@ -249,10 +249,10 @@ const GS = {
     },
     {
       name: 'Inked', class: 'Nahri Healer', color: '#D85A30',
-      hp: 60, hpMax: 60, xp: 0, level: 1,
-      location: 'D5', vehicleSeat: 'Driver front',
-      bonusNote: 'Island: +1 Regen to party (see Classes tab)',
-      bonusStyle: 'background:#e6f1fb;color:#185fa5',
+      hp: 12, hpMax: 60, xp: 0, level: 1,
+      location: 'D1', vehicleSeat: 'Driver front',
+      bonusNote: '⚠ HP Critical (12/60) · Desert D1',
+      bonusStyle: 'background:#faeeda;color:#854f0b',
       equipped: {
         weapon: null,
         armor: { name: 'Boots', lvl: 1, qual: 1, stat: 'DEF 2', note: 'Prevents flood damage (33% per level)' },
@@ -262,14 +262,14 @@ const GS = {
     {
       name: 'CannonFodder', class: 'Hobbit Adventurer', color: '#BA7517',
       hp: 150, hpMax: 150, xp: 0, level: 1,
-      location: 'D9', vehicleSeat: null,
-      bonusNote: 'Mountain +1 Speed',
-      bonusStyle: 'background:#d3d1c7;color:#444441',
+      location: 'D1', vehicleSeat: null,
+      bonusNote: 'Desert D1',
+      bonusStyle: 'background:#faeeda;color:#854f0b',
       equipped: {
         weapon: null,
         armor: null,
       },
-      sa: { name: 'My Precious', desc: 'Invisibility + Move +1 for 2 turns', cdTotal: 4, cdLeft: 2 },
+      sa: { name: 'My Precious', desc: 'Invisibility + Move +1 for 2 turns', cdTotal: 4, cdLeft: 0 },
     },
   ],
 
@@ -357,6 +357,17 @@ const GS = {
         { label:'FEAR — LVL 4+', desc:'15% fear effect per level', danger:true },
       ],
       strong: null, weak: 'Spear <b>(+10 damage)</b>',
+    },
+    {
+      emoji: '🐠', name: 'Piranha', boss: false,
+      desc: 'The smell of blood drives them crazy. Like your cousins at the buffet. Not a pretty sight.',
+      terrain: 'Island', mob: '4-7',
+      stats: { ATK:[6,12,18,24,30], STR:[4,8,12,16,20], DEF:[8,16,24,32,40], HP:[80,160,240,320,400] },
+      abilities: [
+        { label:'WEAPON — LVL 1+', desc:'Uses a weapon attack', danger:false },
+        { label:'BLEED — LVL 3+', desc:'Bleed 15 × 3 turns', danger:true },
+      ],
+      strong: null, weak: 'Lightning <b>(+5 damage)</b>',
     },
   ],
 };
