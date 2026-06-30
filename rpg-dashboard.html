@@ -102,6 +102,8 @@
   <button class="tab" onclick="showTab('market',this)">Market</button>
   <button class="tab" onclick="showTab('vehicles',this)">Vehicles</button>
   <button class="tab" onclick="showTab('bestiary',this)">Bestiary</button>
+  <button class="tab" onclick="showTab('itemsTab',this)">Items</button>
+  <button class="tab" onclick="showTab('spellsTab',this)">Spells</button>
 </div>
 <div id="party" class="section active"></div>
 <div id="status" class="section"></div>
@@ -202,6 +204,8 @@
   </table></div>
 </div>
 <div id="bestiary" class="section"></div>
+<div id="itemsTab" class="section"></div>
+<div id="spellsTab" class="section"></div>
 <script>
 // =============================================================
 //  GAME STATE — UPDATE THIS BLOCK EACH DAY
@@ -213,7 +217,7 @@ const GS = {
   coins: 250,
   quest: 'Museum Day 0/13',
   // encounter: set to { title, desc } when active, else null
-  encounter: { title: 'Combat — Roadrunners × 3 · D1 · Market Found!', desc: '3× Roadrunner LVL 2. Lineup 1: <b>HP 48/80</b> · Lineup 2: HP 80/80 · Lineup 3: HP 80/80. Market discovered at D1.' },
+  encounter: { title: 'Combat — Roadrunners × 3 · D1 · Market Found!', desc: '3× Roadrunner LVL 2. Lineup 1: <b>HP 19/80</b> · Lineup 2: HP 80/80 · Lineup 3: HP 80/80. Market discovered at D1.' },
 
   // POINTS OF INTEREST (discovered locations)
   pois: [
@@ -234,19 +238,19 @@ const GS = {
   players: [
     {
       name: 'Marzen', class: 'Kvothe Storyteller', color: '#7F77DD',
-      hp: 101, hpMax: 125, xp: 0, level: 1,
+      hp: 99, hpMax: 125, xp: 75, level: 1,
       location: 'D1', vehicleSeat: null,
-      bonusNote: 'Desert D1 · Kingkiller used this turn',
+      bonusNote: 'Desert D1',
       bonusStyle: 'background:#faeeda;color:#854f0b',
       equipped: {
         weapon: { name: 'Spear', lvl: 1, qual: 1, stat: 'DMG 4' },
         armor: null,
       },
-      sa: { name: 'Kingkiller', desc: 'Handheld weapon +25 for 1 turn', cdTotal: 5, cdLeft: 5 },
+      sa: { name: 'Kingkiller', desc: 'Handheld weapon +25 for 1 turn', cdTotal: 5, cdLeft: 4 },
     },
     {
       name: 'Rakuyo', class: 'Unsullied Warrior', color: '#1D9E75',
-      hp: 225, hpMax: 225, xp: 50, level: 1,
+      hp: 221, hpMax: 225, xp: 125, level: 1,
       location: 'D1', vehicleSeat: 'Passenger front',
       bonusNote: 'Desert terrain bonus: +2 ATK',
       bonusStyle: 'background:#faeeda;color:#854f0b',
@@ -258,7 +262,7 @@ const GS = {
     },
     {
       name: 'Inked', class: 'Nahri Healer', color: '#D85A30',
-      hp: 12, hpMax: 60, xp: 0, level: 1,
+      hp: 12, hpMax: 60, xp: 75, level: 1,
       location: 'D1', vehicleSeat: 'Driver front',
       bonusNote: '⚠ HP Critical (12/60) · Desert D1',
       bonusStyle: 'background:#faeeda;color:#854f0b',
@@ -270,7 +274,7 @@ const GS = {
     },
     {
       name: 'CannonFodder', class: 'Hobbit Adventurer', color: '#BA7517',
-      hp: 150, hpMax: 150, xp: 0, level: 1,
+      hp: 148, hpMax: 150, xp: 75, level: 1,
       location: 'D1', vehicleSeat: null,
       bonusNote: 'Desert D1',
       bonusStyle: 'background:#faeeda;color:#854f0b',
@@ -419,15 +423,17 @@ const MARKET = [
   ['Spear','Weapon',5,7,4,12,25,8,20,35,12],
   ['Brass Knuckles','Weapon',5,8,2,10,15,4,12,20,7],
   ['Axe Single Blade','Weapon',10,13,5,30,50,9,50,75,13],
+  ['2H Axe-Double Blade','Weapon','—','—','—',50,80,13,100,150,20],
   ['Bow','Weapon',5,10,'—',10,20,3,20,35,5],
   ['Halberd','Weapon',10,25,4,25,50,9,75,130,15],
+  ['2H Sword','Weapon','—','—','—','—','—','—',350,700,45],
   ['Knife','Weapon',5,8,2,7,10,5,13,20,9],
   ['Sling','Weapon',5,10,'—',12,15,'—',20,35,'—'],
   ['Crossbow','Weapon',25,75,'—',60,150,'—',100,250,'—'],
   ['Traps*','Weapon','—',150,'50*','—',250,'75*','—',500,'125*'],
-  ['Bombs^','Weapon','N/A','N/A','N/A','N/A','N/A','N/A','N/A','N/A','N/A'],
+  ['Bombs^','Weapon',150,300,'—',250,500,'—',500,1000,'—'],
   ['Grenades**','Weapon','—','—','—',50,65,'25**',80,125,'50**'],
-  ['Warhammer','Weapon','—','—','—',60,110,15,275,575,33],
+  ['2H Warhammer','Weapon','—','—','—',60,110,15,275,575,33],
   ['Lightsaber','Weapon','—','—','—',400,1000,80,400,1000,80],
   ['Arrow','Weapon Support','1E','50(15)',1,'2E','75(15)',2,'4E','125(15)',4],
   ['Fire Arrow','Weapon Support','3E','—',3,'6E','—',6,'9E','500(20)',9],
@@ -699,6 +705,188 @@ function renderMkt() {
   ).join('');
 }
 
+// --- ITEMS DATA ---
+const ITEM_DESCS = [
+  // Weapons
+  { name:'Spear',               cat:'Weapon',         desc:'Pop singer from the 1990\'s. Famous for hitting babies one more time. Also, a sharp stick.' },
+  { name:'Brass Knuckles',      cat:'Weapon',         desc:'Break your fingers while you break someone else\'s nose.' },
+  { name:'Axe Single Blade',    cat:'Weapon',         desc:'You brought a metal wedge to a wood fight.' },
+  { name:'2H Axe-Double Blade', cat:'Weapon',         desc:'Double handed. Heavy and sometimes sharp paperweight. % chance to crack enemy armor.' },
+  { name:'Bow',                 cat:'Weapon',         desc:'Draw. Nock. Wait for it! A highly aggressive rubber band.' },
+  { name:'Arrow',               cat:'Weapon Support', desc:'Pointy missile often accompanied by the yell \'Let It Rip\'. In other words, a weaponized fart.' },
+  { name:'Fire Arrow',          cat:'Weapon Support', desc:'Pointy fire missile. Still a weaponized fart, now with some stank.' },
+  { name:'Traps',               cat:'Weapon',         desc:'Remember where you place these. Few things more embarrassing than stepping in your own.' },
+  { name:'Bombs',               cat:'Weapon',         desc:'Boom. These do not hit players or creatures.' },
+  { name:'Grenades',            cat:'Weapon',         desc:'Spicy metal avocado that forces you into a 3-second game of hot potato.' },
+  { name:'Sling',               cat:'Weapon',         desc:'Hey, it worked for David.' },
+  { name:'Rocks',               cat:'Weapon Support', desc:'Ordinary pieces of stone. Highly loyal, low-maintenance pet.' },
+  { name:'Maui Rocks',          cat:'Weapon Support', desc:'Stones of a demi-god. Full transparency, this item was added by my 10 year old.' },
+  { name:'Halberd',             cat:'Weapon',         desc:'6-foot long stick. Combination can opener, meat cleaver, and curtain rod. This medieval Swiss Army knife of death is pretty effective. No, I mean it.' },
+  { name:'2H Sword',            cat:'Weapon',         desc:'Double handed. Dealing exclusively in emotional damage and occasional decapitation. Terrifying un-aerodynamic slab of metal.' },
+  { name:'Knife',               cat:'Weapon',         desc:'Do you remember that sharpened toothbrush you made in prison?' },
+  { name:'Crossbow',            cat:'Weapon',         desc:'Regular bow that was told it had to grow up and get a desk job.' },
+  { name:'Bolts',               cat:'Weapon Support', desc:'The email of the office worker.' },
+  { name:'Frost Bolts',         cat:'Weapon Support', desc:'The frostily worded email of the office worker. Prevents fire damage. Cannot be combined with Slug Slime.' },
+  { name:'2H Warhammer',        cat:'Weapon',         desc:'Double handed. Socially acceptable mallet of problem solving. Hit your opponent until the problem turns to apology. Has a chance to stun enemy.' },
+  { name:'Lightsaber',          cat:'Weapon',         desc:'Double handed. Expensive. OSHA violating space flashlight powered by anger. 30% chance to add lightning damage.' },
+  // Armor
+  { name:'Helmet',              cat:'Armor',          desc:'It\'s a metal hat, perfect for keeping the aliens out when you can\'t find a colander.' },
+  { name:'Shield',              cat:'Armor',          desc:'Perfect use for day-old Dominoes pizza. Cannot be used with 2 handed weapons (Double Axe, Sword, Warhammer, Lightsaber).' },
+  { name:'Chest Plate',         cat:'Armor',          desc:'A battle tested sports bra. But really, any good sports bra is battle tested.' },
+  { name:'Boots',               cat:'Armor',          desc:'Hot pink, covered in glitter and sequins. Fur-lined and utterly amazing.' },
+  { name:'Leg Bracers',         cat:'Armor',          desc:'Part orthopedic necessity, part torture. These bad boys scream, I might be made of velcro, but I am still strutting.' },
+  // Gear
+  { name:'Magic Duct Tape',         cat:'Gear', desc:'Fix cracked armour.' },
+  { name:'Slug Slime',              cat:'Gear', desc:'Looks like jello, tastes like boogers. Rub it on your crossbow bolts.' },
+  { name:'Shell',                   cat:'Gear', desc:'Throw it like Yoshi.' },
+  { name:'Bread and a Plastic Knife', cat:'Gear', desc:'Add peanut butter and you have lunch.' },
+  // Clothing
+  { name:'Cloak',    cat:'Clothing', desc:'Mysterious. Representing hidden power or exile. Worn by Dracula, Obi-Wan, Dr. Strange, and Marvin the Martian.' },
+  { name:'Bracelet', cat:'Clothing', desc:'This hand-beaded masterpiece tells others all they need to know from a distance.' },
+];
+
+// --- SPELLS DATA ---
+// levels: [{ range, focus, power, turnEff, cool }] × 3
+const SPELLS = [
+  { name:'Fireball',    initial:'Single Fireball',
+    desc:'Ball of fire. Accurate in close encounters, smells of burnt fish.',
+    levels:[{range:'1',focus:'1',power:5,turnEff:'1',cool:2},{range:'1',focus:'1',power:12,turnEff:'2',cool:2},{range:'2',focus:'1',power:20,turnEff:'3',cool:3}],
+    lvl4only:'Power −50', cool4:5, terrainPlus:'Plains', terrainMinus:'Desert' },
+  { name:'Lightning',   initial:'Bolt Lightning',
+    desc:'Who needs an Asgardian god, when you can summon a bolt of ouch yourself.',
+    levels:[{range:'2',focus:'2',power:7,turnEff:'1',cool:2},{range:'2',focus:'2',power:15,turnEff:'1',cool:2},{range:'3',focus:'2',power:25,turnEff:'2 (50%)',cool:3}],
+    lvl4only:'Turn Effect 3 (25%)', cool4:5, terrainPlus:'Swamp, Island', terrainMinus:'Plains' },
+  { name:'Acid Rain',   initial:'Rain Acid',
+    desc:'Area damage. In Cleveland, this is known as rain.',
+    levels:[{range:'A',focus:'A',power:8,turnEff:'2 (50%)',cool:3},{range:'A',focus:'A',power:13,turnEff:'2 (50%)',cool:3},{range:'A',focus:'A',power:30,turnEff:'2 (50%)',cool:5}],
+    lvl4only:'Power −45', cool4:5, terrainPlus:null, terrainMinus:null },
+  { name:'Animate',     initial:'Animate Dead Creature',
+    desc:'Re-animates creature killed last turn, but only as level 1. Will fight on your side.',
+    levels:[{range:'1',focus:'Assign',power:'25%',turnEff:'Until Dead',cool:10},{range:'—',focus:'—',power:'Creature ×2',turnEff:'—',cool:10},{range:'—',focus:'—',power:'Creature ×3',turnEff:'—',cool:10}],
+    lvl4only:'Creature LVL 2', cool4:10, terrainPlus:null, terrainMinus:null },
+  { name:'Morph',       initial:'Morph — see list',
+    desc:'Chance for player to morph into terrain specific creature, level 3.',
+    levels:[{range:'—',focus:'—',power:'—',turnEff:'—',cool:5},{range:'—',focus:'—',power:'—',turnEff:'—',cool:4},{range:'—',focus:'—',power:'—',turnEff:'—',cool:4}],
+    lvl4only:null, cool4:8, terrainPlus:null, terrainMinus:null },
+  { name:'Projectile',  initial:'*Need Bow, Crossbow, or Sling',
+    desc:'Works to enchant arrows, bolts, or rocks. Unless you intend to throw your brass knuckles.',
+    levels:[{range:'2',focus:'Assign',power:5,turnEff:'1',cool:2},{range:'2',focus:'Assign',power:10,turnEff:'1',cool:3},{range:'3',focus:'Assign',power:22,turnEff:'1',cool:4}],
+    lvl4only:'Adjacent Quadrant', cool4:4, terrainPlus:null, terrainMinus:null },
+  { name:'Heal',        initial:'Heal to Full — 1 Player per Level',
+    desc:'First, do no harm. This spell cannot be used while in battle. Heal 1 player to full.',
+    levels:[{range:'NA',focus:'NA',power:'NA',turnEff:'NA',cool:5},{range:'NA',focus:'NA',power:'NA',turnEff:'NA',cool:6},{range:'NA',focus:'NA',power:'NA',turnEff:'NA',cool:7}],
+    lvl4only:'LVL 2 Item Drop Every Use', cool4:8, terrainPlus:'Island', terrainMinus:null },
+  { name:'Stealth',     initial:'Not Visible to Enemies',
+    desc:'Cannot be attacked directly. Area damage effects reduced.',
+    levels:[{range:'—',focus:'—',power:'—',turnEff:'—',cool:'—'},{range:'—',focus:'—',power:'—',turnEff:'—',cool:'—'},{range:'2 Quad',focus:'NA',power:'NA',turnEff:'2',cool:7}],
+    lvl4only:'Turn Effect 4', cool4:8, terrainPlus:null, terrainMinus:'Swamp — no use' },
+  { name:'Snow',        initial:'Slow Battle',
+    desc:'Area damage. Opponents do half damage, team reduced 20%.',
+    levels:[{range:'A',focus:'NA',power:'NA',turnEff:'2',cool:5},{range:'A',focus:'NA',power:'NA',turnEff:'3',cool:5},{range:'A',focus:'A',power:'NA',turnEff:'NA',cool:6}],
+    lvl4only:'No Team Damage', cool4:6, terrainPlus:'Island, Mountain', terrainMinus:null },
+  { name:'Fear',        initial:'Enemies Skip Turn',
+    desc:'Enemies pee themselves and run away. They skip their next turn.',
+    levels:[{range:'1',focus:'1',power:'NA',turnEff:'1',cool:4},{range:'1',focus:'1',power:'NA',turnEff:'2',cool:4},{range:'2',focus:'2',power:'NA',turnEff:'2',cool:5}],
+    lvl4only:'Turn Effect 3', cool4:6, terrainPlus:'Swamp', terrainMinus:null },
+  { name:'Run Away',    initial:'You Run Away',
+    desc:'You run away. They were throwing cows at you afterall.',
+    levels:[{range:'—',focus:'—',power:'—',turnEff:'—',cool:'—'},{range:'—',focus:'—',power:'—',turnEff:'—',cool:'—'},{range:'—',focus:'—',power:'—',turnEff:'—',cool:6}],
+    lvl4only:'LVL 2 Item Drop', cool4:9, terrainPlus:null, terrainMinus:null },
+  { name:'Flood',       initial:'Flood Quadrant',
+    desc:'Area damage. Flood the quadrant with the tears of the fallen. Your team takes 20% damage.',
+    levels:[{range:'—',focus:'—',power:'—',turnEff:'—',cool:'—'},{range:'A',focus:'A',power:25,turnEff:'2 (50%)',cool:7},{range:'A',focus:'A',power:50,turnEff:'2 (50%)',cool:8}],
+    lvl4only:'Turn Effect 3 (25%)', cool4:10, terrainPlus:'Island', terrainMinus:'Plains' },
+  { name:'Summon',      initial:'Summon — see list',
+    desc:'Summon a random creature, terrain specific, to fight on your side. Does not work in the OP.',
+    levels:[{range:'—',focus:'Assign',power:'—',turnEff:'Until Dead',cool:10},{range:'—',focus:'Assign',power:'—',turnEff:'Until Dead',cool:10},{range:'—',focus:'Assign',power:'—',turnEff:'Until Dead',cool:10}],
+    lvl4only:null, cool4:10, terrainPlus:null, terrainMinus:null },
+  { name:'Lava Burst',  initial:'Lava Burst',
+    desc:'Area damage. It\'s getting hot in here. Your team takes 20% damage.',
+    levels:[{range:'A',focus:'A',power:15,turnEff:'2 (50%)',cool:8},{range:'A',focus:'A',power:25,turnEff:'2 (50%)',cool:9},{range:'A',focus:'A',power:50,turnEff:'2 (50%)',cool:9}],
+    lvl4only:'Turn Effect 3 (25%)', cool4:10, terrainPlus:'Mountain', terrainMinus:null },
+  { name:'Teleport',    initial:'Teleport Away',
+    desc:'Step into the TARDIS and poof into the nether. Works just on you, and you go wherever I send you.',
+    levels:[{range:'Self-Random',focus:'—',power:'—',turnEff:'—',cool:5},{range:'Self-Targeted',focus:'—',power:'—',turnEff:'—',cool:6},{range:'Opponent-Random',focus:'—',power:'—',turnEff:'—',cool:7}],
+    lvl4only:'Party-Targeted', cool4:10, terrainPlus:null, terrainMinus:null },
+  { name:'Elusive',     initial:'Add Defence +50% — Self',
+    desc:'Wiggle to the left, wiggle to the right. Nah-nah, you can\'t hit me. This spell increases your defence 50%.',
+    levels:[{range:'NA',focus:'NA',power:'NA',turnEff:'2',cool:4},{range:'NA',focus:'NA',power:'NA',turnEff:'3',cool:6},{range:'NA',focus:'NA',power:'NA',turnEff:'4',cool:8}],
+    lvl4only:'Whole Party', cool4:10, terrainPlus:null, terrainMinus:'Swamp' },
+  { name:'Inferno',     initial:'Create Flaming Weapon',
+    desc:'Create a flaming weapon. Singed eyebrows anyone? Only works on Double Axe, Warhammer and Sword.',
+    levels:[{range:'—',focus:'—',power:'—',turnEff:'—',cool:'—'},{range:'NA',focus:'NA',power:10,turnEff:'2',cool:6},{range:'NA',focus:'NA',power:20,turnEff:'3',cool:8}],
+    lvl4only:'Turn Effect 5', cool4:10, terrainPlus:'Desert', terrainMinus:null },
+];
+
+// --- ITEMS RENDER ---
+let itemFilter = 'all';
+function filterItems(cat, el) {
+  itemFilter = cat;
+  document.querySelectorAll('.ifltr').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderItems();
+}
+function renderItems() {
+  const catBadges = { 'Weapon':'bwp', 'Weapon Support':'bwp', 'Armor':'bap', 'Gear':'bsp', 'Clothing':'bsp' };
+  const cats = ['all','Weapon','Weapon Support','Armor','Gear','Clothing'];
+  const labels = { all:'All', 'Weapon':'Weapon', 'Weapon Support':'Support', 'Armor':'Armour', 'Gear':'Gear', 'Clothing':'Clothing' };
+  const btns = cats.map(c =>
+    `<button class="fbtn ifltr${itemFilter===c?' active':''}" onclick="filterItems('${c}',this)">${labels[c]}</button>`
+  ).join('');
+  const f = itemFilter === 'all' ? ITEM_DESCS : ITEM_DESCS.filter(i => i.cat === itemFilter);
+  const rows = f.map(i =>
+    `<tr><td style="white-space:nowrap;font-weight:500">${i.name}</td><td><span class="bdg ${catBadges[i.cat]||'bsp'}">${i.cat}</span></td><td style="font-size:12px;color:var(--text-secondary);line-height:1.5">${i.desc}</td></tr>`
+  ).join('');
+  document.getElementById('itemsTab').innerHTML = `
+    <div class="frow">${btns}</div>
+    <table class="itbl">
+      <thead><tr><th>Item</th><th>Category</th><th>Description</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+// --- SPELLS RENDER ---
+function renderSpells() {
+  const lvlColors = ['#7F77DD','#1D9E75','#D85A30'];
+  const sv = v => (v === null || v === '—' || v === '') ? '<span style="color:var(--text-tertiary)">—</span>' : v;
+  const statKeys = [
+    { key:'range',   label:'Range' },
+    { key:'focus',   label:'Focus' },
+    { key:'power',   label:'Power' },
+    { key:'turnEff', label:'Turn Effect' },
+    { key:'cool',    label:'Cooldown' },
+  ];
+  let html = `<p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">A = Area (all in quadrant) · Assign = caster assigns target · NA = not applicable · Turn Effect = turns the effect lasts</p>`;
+  SPELLS.forEach(s => {
+    const terrainTags = [
+      s.terrainPlus  ? `<span class="ttag" style="background:#eaf3de;color:#3b6d11">+3 DMG: ${s.terrainPlus}</span>`  : '',
+      s.terrainMinus ? `<span class="ttag" style="background:#fcebeb;color:#a32d2d">−3 DMG: ${s.terrainMinus}</span>` : '',
+    ].filter(Boolean).join(' ');
+    const lvl4Html = s.lvl4only
+      ? `<div style="margin-top:8px;background:var(--bg-secondary);border-radius:var(--radius-md);padding:6px 10px;font-size:12px"><span class="bdg bsp" style="margin-right:6px">LVL 4+ SPELLER ONLY</span>${s.lvl4only} <span style="color:var(--text-secondary)">· CD ${s.cool4}</span></div>`
+      : `<div style="margin-top:8px;font-size:12px;color:var(--text-secondary)">LVL 4+ CD: ${s.cool4}</div>`;
+    const statRows = statKeys.map(({ key, label }) =>
+      `<tr><td class="tl" style="color:var(--text-secondary)">${label}</td>${s.levels.map((l,i) => `<td style="color:${lvlColors[i]}">${sv(l[key])}</td>`).join('')}</tr>`
+    ).join('');
+    html += `<div class="card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-size:15px;font-weight:500">${s.name}</div>
+          <div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Initial: ${s.initial}</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;font-style:italic">${s.desc}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start;margin-top:2px">${terrainTags}</div>
+      </div>
+      <div style="margin-top:10px;overflow-x:auto"><table class="beast-stat-tbl">
+        <thead><tr style="background:var(--bg-secondary)"><th class="tl">Stat</th>${lvlColors.map((c,i)=>`<th style="color:${c}">LVL ${i+1}</th>`).join('')}</tr></thead>
+        <tbody>${statRows}</tbody>
+      </table></div>
+      ${lvl4Html}
+    </div>`;
+  });
+  document.getElementById('spellsTab').innerHTML = html;
+}
+
 // --- TAB SWITCH ---
 function showTab(id, el) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -715,6 +903,8 @@ renderMap();
 renderBestiary();
 renderVehicles();
 renderMkt();
+renderItems();
+renderSpells();
 </script>
 </body>
 </html>
