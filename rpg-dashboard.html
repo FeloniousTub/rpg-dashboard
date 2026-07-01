@@ -137,8 +137,9 @@
     <div class="mleg-item"><div class="mleg-dot" style="background:#eeedfe"></div>Swamp (S)</div>
     <div class="mleg-item"><div class="mleg-dot" style="background:#d3d1c7"></div>Mountain (M)</div>
     <div class="mleg-item"><div class="mleg-dot" style="background:#f0eeea;border:.5px solid #ccc"></div>Outer Place (OP)</div>
-    <div class="mleg-item"><div class="mleg-dot" style="outline:2px solid #e24b4a;"></div>Vehicle</div>
-    <div class="mleg-item"><div class="mleg-dot" style="outline:2px solid #BA7517;"></div>Solo player</div>
+    <div class="mleg-item"><div class="mleg-dot" style="outline:2px solid #e24b4a;"></div>Party riding in vehicle</div>
+    <div class="mleg-item"><div class="mleg-dot" style="outline:2px solid #BA7517;"></div>Player(s) on foot</div>
+    <div class="mleg-item"><span style="font-size:12px">🚗</span> Vehicle parked here</div>
     <div class="mleg-item"><span style="font-size:12px">🏪</span> Market</div>
     <div class="mleg-item"><span style="font-size:12px">⚰️</span> Crypt</div>
     <div class="mleg-item"><span style="font-size:12px">⛪</span> Monastery</div>
@@ -194,7 +195,7 @@
     <button class="fbtn active" onclick="filterMkt('all',this)">All</button>
     <button class="fbtn" onclick="filterMkt('Weapon',this)">Weapon</button>
     <button class="fbtn" onclick="filterMkt('Weapon Support',this)">Support</button>
-    <button class="fbtn" onclick="filterMkt('Armor',this)">Armor</button>
+    <button class="fbtn" onclick="filterMkt('Armour',this)">Armour</button>
     <button class="fbtn" onclick="filterMkt('Clothing',this)">Clothing</button>
     <button class="fbtn" onclick="filterMkt('Potion',this)">Potion</button>
     <button class="fbtn" onclick="filterMkt('Gear',this)">Gear</button>
@@ -485,11 +486,11 @@ const MARKET = [
   ['Maui Rocks','Weapon Support','4E','75(10)',2,'9E','150(10)',7,'15E','225(10)',12],
   ['Bolts','Weapon Support','10E','100(6)',5,'15E','150(6)',12,'25E','250(6)',17],
   ['Frost Bolts','Weapon Support','8E','—',8,'20E','500(20)',15,'30E','—',30],
-  ['Helmet','Armor',15,20,3,30,40,6,45,60,9],
-  ['Shield','Armor',22,30,5,44,60,10,66,90,15],
-  ['Chest Plate','Armor',18,25,4,27,38,8,36,50,12],
-  ['Boots','Armor',10,20,2,20,40,4,40,80,6],
-  ['Leg Bracers','Armor',15,30,4,30,60,8,45,90,12],
+  ['Helmet','Armour',15,20,3,30,40,6,45,60,9],
+  ['Shield','Armour',22,30,5,44,60,10,66,90,15],
+  ['Chest Plate','Armour',18,25,4,27,38,8,36,50,12],
+  ['Boots','Armour',10,20,2,20,40,4,40,80,6],
+  ['Leg Bracers','Armour',15,30,4,30,60,8,45,90,12],
   ['Bread & Plastic Knife','Gear',0,150,0,0,0,0,0,0,0],
   ['Cloak','Clothing','—','—','—','—','—','—',500,1250,5],
   ['Ring of Mystery','Clothing','—','—','—','—','—','—','—',1000,0],
@@ -703,12 +704,25 @@ function renderMap() {
     d.className = 'mc ' + terrainCls(cell) + extra;
     d.style.flexDirection = 'column';
     d.style.gap = '1px';
-    if (poiMap[cell]) {
-      const icon = document.createElement('span');
-      icon.style.fontSize = '12px';
-      icon.title = poiMap[cell].name;
-      icon.textContent = poiMap[cell].emoji;
-      d.appendChild(icon);
+    if (poiMap[cell] || cell === GS.vehicle.location) {
+      const iconRow = document.createElement('span');
+      iconRow.style.display = 'flex';
+      iconRow.style.gap = '2px';
+      if (poiMap[cell]) {
+        const icon = document.createElement('span');
+        icon.style.fontSize = '12px';
+        icon.title = poiMap[cell].name;
+        icon.textContent = poiMap[cell].emoji;
+        iconRow.appendChild(icon);
+      }
+      if (cell === GS.vehicle.location) {
+        const veh = document.createElement('span');
+        veh.style.fontSize = '12px';
+        veh.title = `${GS.vehicle.name} — parked here`;
+        veh.textContent = '🚗';
+        iconRow.appendChild(veh);
+      }
+      d.appendChild(iconRow);
     }
     const lbl = document.createElement('span');
     lbl.textContent = cell;
@@ -829,11 +843,11 @@ const ITEM_DESCS = [
   { name:'2H Warhammer',        cat:'Weapon',         desc:'Double handed. Socially acceptable mallet of problem solving. Hit your opponent until the problem turns to apology. Has a chance to stun enemy.' },
   { name:'Lightsaber',          cat:'Weapon',         desc:'Double handed. Expensive. OSHA violating space flashlight powered by anger. 30% chance to add lightning damage.' },
   // Armor
-  { name:'Helmet',              cat:'Armor',          desc:'It\'s a metal hat, perfect for keeping the aliens out when you can\'t find a colander.' },
-  { name:'Shield',              cat:'Armor',          desc:'Perfect use for day-old Dominoes pizza. Cannot be used with 2 handed weapons (Double Axe, Sword, Warhammer, Lightsaber).' },
-  { name:'Chest Plate',         cat:'Armor',          desc:'A battle tested sports bra. But really, any good sports bra is battle tested.' },
-  { name:'Boots',               cat:'Armor',          desc:'Hot pink, covered in glitter and sequins. Fur-lined and utterly amazing.' },
-  { name:'Leg Bracers',         cat:'Armor',          desc:'Part orthopedic necessity, part torture. These bad boys scream, I might be made of velcro, but I am still strutting.' },
+  { name:'Helmet',              cat:'Armour',          desc:'It\'s a metal hat, perfect for keeping the aliens out when you can\'t find a colander.' },
+  { name:'Shield',              cat:'Armour',          desc:'Perfect use for day-old Dominoes pizza. Cannot be used with 2 handed weapons (Double Axe, Sword, Warhammer, Lightsaber).' },
+  { name:'Chest Plate',         cat:'Armour',          desc:'A battle tested sports bra. But really, any good sports bra is battle tested.' },
+  { name:'Boots',               cat:'Armour',          desc:'Hot pink, covered in glitter and sequins. Fur-lined and utterly amazing.' },
+  { name:'Leg Bracers',         cat:'Armour',          desc:'Part orthopedic necessity, part torture. These bad boys scream, I might be made of velcro, but I am still strutting.' },
   // Gear
   { name:'Magic Duct Tape',         cat:'Gear', desc:'Fix cracked armour.' },
   { name:'Book',                    cat:'Gear', desc:'' },
@@ -938,9 +952,9 @@ function filterItems(cat, el) {
   renderItems();
 }
 function renderItems() {
-  const catBadges = { 'Weapon':'bwp', 'Weapon Support':'bwp', 'Armor':'bap', 'Gear':'bsp', 'Clothing':'bsp', 'Potion':'bap' };
-  const cats = ['all','Weapon','Weapon Support','Armor','Gear','Clothing','Potion'];
-  const labels = { all:'All', 'Weapon':'Weapon', 'Weapon Support':'Support', 'Armor':'Armour', 'Gear':'Gear', 'Clothing':'Clothing', 'Potion':'Potion' };
+  const catBadges = { 'Weapon':'bwp', 'Weapon Support':'bwp', 'Armour':'bap', 'Gear':'bsp', 'Clothing':'bsp', 'Potion':'bap' };
+  const cats = ['all','Weapon','Weapon Support','Armour','Gear','Clothing','Potion'];
+  const labels = { all:'All', 'Weapon':'Weapon', 'Weapon Support':'Support', 'Armour':'Armour', 'Gear':'Gear', 'Clothing':'Clothing', 'Potion':'Potion' };
   const btns = cats.map(c =>
     `<button class="fbtn ifltr${itemFilter===c?' active':''}" onclick="filterItems('${c}',this)">${labels[c]}</button>`
   ).join('');
