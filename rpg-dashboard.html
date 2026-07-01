@@ -69,6 +69,7 @@
   .hint{font-size:11px;color:var(--text-secondary);margin-top:6px;}.tbl-wrap{overflow-x:auto;}
   .ibox{margin-top:6px;border-radius:6px;padding:6px 8px;font-size:12px;}
   .ibox-weapon{background:#eaf3de;color:#3b6d11;}.ibox-armor{background:#e6f1fb;color:#185fa5;}.ibox-none{background:#f5f5f3;color:#6b6a66;}
+  .ibox-spell{background:#eeedfe;color:#3c3489;}.ibox-gear{background:#faeeda;color:#854f0b;}
   .ibox-label{font-size:10px;font-weight:600;letter-spacing:.04em;opacity:.7;margin-bottom:1px;}
   .ibox-detail{font-size:11px;opacity:.8;margin-top:2px;}
   .warnbox{background:var(--bg-warning);color:var(--text-warning);border-radius:var(--radius-md);padding:8px 12px;font-size:12px;margin-bottom:10px;line-height:1.7;}
@@ -88,6 +89,25 @@
   .ab-lbl{font-size:10px;font-weight:600;letter-spacing:.04em;margin-bottom:4px;}
   .weak-grid{margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
   .boss-badge{background:#a32d2d;color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:600;margin-left:6px;}
+  .lineup-section{margin-top:1.75rem;}
+  .lineup-strip{position:relative;padding:14px 0;}
+  .lineup-strip::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:repeating-linear-gradient(to bottom,var(--border-med) 0,var(--border-med) 6px,transparent 6px,transparent 12px);transform:translateX(-50%);}
+  .lineup-row{position:relative;display:grid;grid-template-columns:1fr 44px 1fr;align-items:center;gap:0;margin-bottom:10px;}
+  .lineup-row:last-child{margin-bottom:0;}
+  .lineup-slot{border-radius:var(--radius-md);padding:8px 10px;display:flex;align-items:center;gap:8px;min-height:20px;position:relative;z-index:1;}
+  .lineup-slot.side-p{background:var(--bg-primary);border:1px solid var(--border-light);justify-self:end;width:100%;}
+  .lineup-slot.side-e{background:var(--bg-primary);border:1px solid var(--border-light);justify-self:start;width:100%;}
+  .lineup-slot.empty{background:transparent;border:1px dashed var(--border-light);color:var(--text-tertiary);font-size:11px;justify-content:center;font-style:italic;}
+  .lineup-pos{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;background:var(--bg-secondary);color:var(--text-secondary);}
+  .lineup-row.pos1 .lineup-pos{background:#854f0b;color:#fff;}
+  .lineup-body{flex:1;min-width:0;}
+  .lineup-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .lineup-sub{font-size:10px;color:var(--text-secondary);margin-top:1px;}
+  .lineup-hpbar{height:5px;border-radius:99px;background:rgba(0,0,0,0.08);overflow:hidden;margin-top:4px;}
+  .lineup-hpfill{height:100%;border-radius:99px;transition:width .3s;}
+  .lineup-vs{text-align:center;font-size:13px;z-index:1;}
+  .lineup-frontline{text-align:center;font-size:10px;font-weight:600;letter-spacing:.04em;color:#854f0b;margin-bottom:6px;text-transform:uppercase;}
+  .lineup-legend{display:flex;justify-content:space-between;font-size:11px;color:var(--text-secondary);margin-bottom:10px;font-weight:500;}
 </style>
 </head>
 <body>
@@ -214,10 +234,18 @@
 const GS = {
 
   // META
-  coins: 250,
+  coins: 280,
   quest: 'Museum Day 0/13',
-  // encounter: set to { title, desc } when active, else null
-  encounter: { title: 'Combat — Roadrunners × 3 · D1 · Market Found!', desc: '3× Roadrunner LVL 2. Lineup 1: <b>HP 19/80</b> · Lineup 2: HP 80/80 · Lineup 3: HP 80/80. Market discovered at D1.' },
+  // encounter: set to { title, desc, opponents } when active, else null
+  // opponents: [{ name, lvl, hp, hpMax, lineupPos }] — drives the lineup visual together with players[].lineupPos
+  encounter: {
+    title: 'Combat — Roadrunners × 2 · D1',
+    desc: '2× Roadrunner LVL 2 remain.',
+    opponents: [
+      { name: 'Roadrunner', lvl: 2, hp: 38, hpMax: 80, lineupPos: 2 },
+      { name: 'Roadrunner', lvl: 2, hp: 55, hpMax: 80, lineupPos: 3 },
+    ],
+  },
 
   // POINTS OF INTEREST (discovered locations)
   pois: [
@@ -227,71 +255,76 @@ const GS = {
   // VEHICLE
   vehicle: {
     name: '2002 Honda Civic (Blue)',
-    location: 'D1',
+    location: 'D3',
     upgrades: [],        // e.g. ['GPS', 'CD Player']
   },
 
   // PLAYERS
   // vehicleSeat: null = on foot | 'Driver front' | 'Passenger front' | etc
   // sa.cdLeft: turns remaining. 0 = ready
-  // equipped.weapon / armor: null if nothing equipped
+  // equipped: array of items currently equipped/carried by this player — no fixed limit,
+  //   each item: { cat: 'WEAPON'|'ARMOR'|'SPELL'|'GEAR'|'POTION', name, lvl, qual, stat, note? }
+  //   empty array [] if nothing equipped
+  // lineupPos: this player's combat lineup position (1 = front line). null if not currently in a lineup.
   players: [
     {
       name: 'Marzen', class: 'Kvothe Storyteller', color: '#7F77DD',
-      hp: 99, hpMax: 125, xp: 75, level: 1,
-      location: 'D1', vehicleSeat: null,
+      hp: 93, hpMax: 125, xp: 155, level: 1,
+      location: 'D1', vehicleSeat: null, lineupPos: 1,
       bonusNote: 'Desert D1',
       bonusStyle: 'background:#faeeda;color:#854f0b',
-      equipped: {
-        weapon: { name: 'Spear', lvl: 1, qual: 1, stat: 'DMG 4' },
-        armor: null,
-      },
-      sa: { name: 'Kingkiller', desc: 'Handheld weapon +25 for 1 turn', cdTotal: 5, cdLeft: 4 },
+      equipped: [
+        { cat: 'WEAPON', name: 'Spear',       lvl: 1, qual: 1,  stat: 'DMG 4+2' },
+        { cat: 'WEAPON', name: 'Frost Bolts', lvl: 3, qual: 15, stat: 'DMG 30', note: 'Ammo for Spear' },
+      ],
+      sa: { name: 'Kingkiller', desc: 'Handheld weapon +25 for 1 turn', cdTotal: 5, cdLeft: 3 },
     },
     {
       name: 'Rakuyo', class: 'Unsullied Warrior', color: '#1D9E75',
-      hp: 221, hpMax: 225, xp: 125, level: 1,
-      location: 'D1', vehicleSeat: 'Passenger front',
-      bonusNote: 'Desert terrain bonus: +2 ATK',
+      hp: 213, hpMax: 225, xp: 205, level: 1,
+      location: 'D1', vehicleSeat: null, lineupPos: 3,
+      bonusNote: 'Desert D1',
       bonusStyle: 'background:#faeeda;color:#854f0b',
-      equipped: {
-        weapon: { name: 'Axe-Single Blade', lvl: 1, qual: 1, stat: 'DMG 5' },
-        armor: null,
-      },
+      equipped: [
+        { cat: 'WEAPON', name: 'Axe-Single Blade', lvl: 1, qual: 1,   stat: 'DMG 5' },
+        { cat: 'WEAPON', name: 'Bow',              lvl: 2, qual: 1,   stat: '—', note: 'Requires arrows/bolts' },
+        { cat: 'GEAR',   name: 'Xanax',            lvl: 3, qual: '—', stat: '—' },
+      ],
       sa: { name: 'Unique Eunuch', desc: 'Weapon & Attack +5 for 2 turns', cdTotal: 5, cdLeft: 0 },
     },
     {
       name: 'Inked', class: 'Nahri Healer', color: '#D85A30',
-      hp: 12, hpMax: 60, xp: 75, level: 1,
-      location: 'D1', vehicleSeat: 'Driver front',
-      bonusNote: '⚠ HP Critical (12/60) · Desert D1',
+      hp: 60, hpMax: 60, xp: 155, level: 1,
+      location: 'D1', vehicleSeat: null, lineupPos: 4,
+      bonusNote: 'Desert D1',
       bonusStyle: 'background:#faeeda;color:#854f0b',
-      equipped: {
-        weapon: null,
-        armor: { name: 'Boots', lvl: 1, qual: 1, stat: 'DEF 2', note: 'Prevents flood damage (33% per level)' },
-      },
+      equipped: [
+        { cat: 'ARMOR', name: 'Boots',       lvl: 1, qual: 1, stat: 'DEF 2' },
+        { cat: 'ARMOR', name: 'Chest Plate', lvl: 3, qual: 1, stat: 'DEF 12' },
+        { cat: 'SPELL', name: 'Fireball',    lvl: 1, qual: 1, stat: 'DMG 5' },
+        { cat: 'SPELL', name: 'Lightning',   lvl: 1, qual: 1, stat: 'DMG 7' },
+      ],
       sa: { name: 'Waterproof Bandaid', desc: 'Heal party to full HP — except players on Island terrain healed to half. Not usable in combat.', cdTotal: 8, cdLeft: 0 },
     },
     {
       name: 'CannonFodder', class: 'Hobbit Adventurer', color: '#BA7517',
-      hp: 148, hpMax: 150, xp: 75, level: 1,
-      location: 'D1', vehicleSeat: null,
+      hp: 142, hpMax: 150, xp: 155, level: 1,
+      location: 'D1', vehicleSeat: null, lineupPos: 2,
       bonusNote: 'Desert D1',
       bonusStyle: 'background:#faeeda;color:#854f0b',
-      equipped: {
-        weapon: null,
-        armor: null,
-      },
+      equipped: [
+        { cat: 'WEAPON', name: 'Spear',           lvl: 3, qual: 1, stat: 'DMG 12' },
+        { cat: 'WEAPON', name: 'Brass Knuckles',  lvl: 1, qual: 1, stat: 'DMG 2' },
+        { cat: 'SPELL',  name: 'Fear',            lvl: 1, qual: 1, stat: '—', note: 'Prevents flood damage (33% per level)' },
+      ],
       sa: { name: 'My Precious', desc: 'Invisibility + Move +1 for 2 turns', cdTotal: 4, cdLeft: 0 },
     },
   ],
 
-  // TEAM INVENTORY (unequipped)
+  // TEAM INVENTORY (shared/unowned — not carried by any specific player)
   // cat: 'WEAPON' | 'ARMOR' | 'SPELL' | 'GEAR' | 'POTION'
   teamInventory: [
-    { cat: 'SPELL',  name: 'Lightning',      lvl: 1, qual: 1, stat: 'DMG 7', note: '' },
-    { cat: 'WEAPON', name: 'Bow',            lvl: 2, qual: 1, stat: '—',     note: 'Requires arrows/bolts' },
-    { cat: 'WEAPON', name: 'Brass Knuckles', lvl: 1, qual: 1, stat: 'DMG 2', note: '' },
+    { cat: 'WEAPON', name: 'Halberd', lvl: 1, qual: 1, stat: 'DMG 4', note: '' },
   ],
 
   // BESTIARY
@@ -381,6 +414,17 @@ const GS = {
         { label:'BLEED — LVL 3+', desc:'Bleed 15 × 3 turns', danger:true },
       ],
       strong: null, weak: 'Lightning <b>(+5 damage)</b>',
+    },
+    {
+      emoji: '🐌', name: 'Doomslug', boss: false,
+      desc: 'This cytonic spasmoid will fit in your pocket, and tell the gods your whereabouts. Never trust them. Also, squishy and cute.',
+      terrain: 'Outer Place', mob: '3-5',
+      stats: { ATK:[5,10,15,20,25], STR:[6,12,18,24,30], DEF:[8,16,24,32,40], HP:[90,180,270,360,450] },
+      abilities: [
+        { label:'WEAPON — LVL 1+', desc:'Uses a weapon attack', danger:false },
+        { label:'DEBUFF — LVL 3+', desc:'Applies a debuff on hit', danger:true },
+      ],
+      strong: null, weak: null,
     },
   ],
 };
@@ -495,6 +539,10 @@ function catBadge(cat) {
   return `<span class="bdg ${m[cat]||'bsp'}">${cat}</span>`;
 }
 
+// Equipped-item card styling per category (used by renderParty's per-player equipped list)
+const CAT_IBOX = { WEAPON:'ibox-weapon', ARMOR:'ibox-armor', SPELL:'ibox-spell', GEAR:'ibox-gear', POTION:'ibox-gear' };
+const CAT_ICON = { WEAPON:'⚔', ARMOR:'🛡', SPELL:'✨', GEAR:'🎒', POTION:'🧪' };
+
 function banner() {
   if (GS.encounter) {
     return `<div class="enc-banner">⚔ <b>${GS.encounter.title}</b> — ${GS.encounter.desc}</div>`;
@@ -512,6 +560,57 @@ function banner() {
 
 // --- RENDERERS ---
 
+function hpBarColor(pct) {
+  if (pct > 60) return '#3b6d11';
+  if (pct > 30) return '#854f0b';
+  return '#a32d2d';
+}
+
+function renderLineupSection() {
+  const enc = GS.encounter;
+  if (!enc || !enc.opponents || !enc.opponents.length) return '';
+  const maxPos = Math.max(
+    0,
+    ...GS.players.filter(p => p.lineupPos).map(p => p.lineupPos),
+    ...enc.opponents.map(o => o.lineupPos)
+  );
+  let rows = '';
+  for (let pos = 1; pos <= maxPos; pos++) {
+    const p = GS.players.find(pl => pl.lineupPos === pos);
+    const o = enc.opponents.find(op => op.lineupPos === pos);
+    const pPct = p ? Math.round(p.hp / p.hpMax * 100) : 0;
+    const oPct = o ? Math.round(o.hp / o.hpMax * 100) : 0;
+    const pSlot = p
+      ? `<div class="lineup-slot side-p" style="border-left:3px solid ${p.color}">
+           <div class="lineup-body" style="text-align:right">
+             <div class="lineup-name">${p.name}</div>
+             <div class="lineup-sub">${p.hp}/${p.hpMax} HP</div>
+             <div class="lineup-hpbar"><div class="lineup-hpfill" style="width:${pPct}%;background:${hpBarColor(pPct)};margin-left:auto"></div></div>
+           </div>
+           <div class="lineup-pos">${pos}</div>
+         </div>`
+      : `<div class="lineup-slot empty">—</div>`;
+    const oSlot = o
+      ? `<div class="lineup-slot side-e" style="border-right:3px solid #a32d2d">
+           <div class="lineup-pos">${pos}</div>
+           <div class="lineup-body">
+             <div class="lineup-name">${o.name} <span style="color:var(--text-secondary);font-weight:400">L${o.lvl}</span></div>
+             <div class="lineup-sub">${o.hp}/${o.hpMax} HP</div>
+             <div class="lineup-hpbar"><div class="lineup-hpfill" style="width:${oPct}%;background:${hpBarColor(oPct)}"></div></div>
+           </div>
+         </div>`
+      : `<div class="lineup-slot empty">—</div>`;
+    const vsIcon = (p && o) ? '⚔' : '·';
+    rows += `<div class="lineup-row${pos===1?' pos1':''}">${pSlot}<div class="lineup-vs">${vsIcon}</div>${oSlot}</div>`;
+  }
+  return `<div class="lineup-section">
+    <div class="stitle">⚔ Combat Lineup</div>
+    <div class="lineup-legend"><span>YOUR PARTY</span><span>OPPONENTS</span></div>
+    <div class="lineup-frontline">🛡 Position 1 = front line — can only be hit by opposing Position 1 unless ranged</div>
+    <div class="lineup-strip">${rows}</div>
+  </div>`;
+}
+
 function renderParty() {
   let html = banner() + '<div class="g4">';
   GS.players.forEach(p => {
@@ -521,13 +620,14 @@ function renderParty() {
     const locPill = inVeh
       ? `<div style="margin-top:4px;background:#e6f1fb;border-radius:6px;padding:4px 8px;font-size:11px;color:#185fa5">🚗 ${GS.vehicle.name} · ${p.vehicleSeat} · ${p.location}</div>`
       : `<div style="margin-top:4px;background:#fcebeb;border-radius:6px;padding:4px 8px;font-size:11px;color:#a32d2d">🚶 On foot · ${p.location}</div>`;
-    let eqHtml = '';
-    if (p.equipped.weapon) eqHtml += `<div class="ibox ibox-weapon"><div class="ibox-label">⚔ WEAPON — EQUIPPED</div><div><b>${p.equipped.weapon.name}</b></div><div class="ibox-detail">LVL ${p.equipped.weapon.lvl} · QUAL ${p.equipped.weapon.qual} · ${p.equipped.weapon.stat}</div></div>`;
-    if (p.equipped.armor) {
-      const n = p.equipped.armor.note ? ` · ${p.equipped.armor.note}` : '';
-      eqHtml += `<div class="ibox ibox-armor"><div class="ibox-label">🛡 ARMOR — EQUIPPED</div><div><b>${p.equipped.armor.name}</b></div><div class="ibox-detail">LVL ${p.equipped.armor.lvl} · QUAL ${p.equipped.armor.qual} · ${p.equipped.armor.stat}${n}</div></div>`;
-    }
-    if (!p.equipped.weapon && !p.equipped.armor) eqHtml = `<div class="ibox ibox-none" style="margin-top:8px"><div class="ibox-label">NO ITEM EQUIPPED</div></div>`;
+    let eqHtml = p.equipped.length
+      ? p.equipped.map(it => {
+          const cls = CAT_IBOX[it.cat] || 'ibox-gear';
+          const icon = CAT_ICON[it.cat] || '❖';
+          const n = it.note ? ` · ${it.note}` : '';
+          return `<div class="ibox ${cls}"><div class="ibox-label">${icon} ${it.cat} — EQUIPPED</div><div><b>${it.name}</b></div><div class="ibox-detail">LVL ${it.lvl} · QUAL ${it.qual} · ${it.stat}${n}</div></div>`;
+        }).join('')
+      : `<div class="ibox ibox-none" style="margin-top:8px"><div class="ibox-label">NO ITEMS EQUIPPED</div></div>`;
     const onCd = p.sa.cdLeft > 0;
     const saLbl = onCd ? `Special — ${p.sa.name} · ⏳ ON COOLDOWN` : `Special — ${p.sa.name}`;
     const saStatus = onCd
@@ -552,6 +652,7 @@ function renderParty() {
     </div>`;
   });
   html += '</div>';
+  html += renderLineupSection();
   document.getElementById('party').innerHTML = html;
 }
 
@@ -564,9 +665,7 @@ function renderStatus() {
     const vehCell = p.vehicleSeat
       ? `<td style="color:var(--text-success)">✓ ${p.vehicleSeat}</td>`
       : `<td style="color:var(--text-danger)">✗ On foot</td>`;
-    const parts = [];
-    if (p.equipped.weapon) parts.push(`<span class="bdg bwp">WEAPON</span> ${p.equipped.weapon.name} L${p.equipped.weapon.lvl}`);
-    if (p.equipped.armor)  parts.push(`<span class="bdg bap">ARMOR</span> ${p.equipped.armor.name} L${p.equipped.armor.lvl}`);
+    const parts = p.equipped.map(it => `${catBadge(it.cat)} ${it.name} L${it.lvl}`);
     const eqCell = parts.length ? `<td>${parts.join('<br>')}</td>` : `<td style="color:var(--text-secondary)">—</td>`;
     return `<tr><td><b>${p.name}</b> <span style="color:var(--text-secondary);font-size:11px">${p.class.split(' ')[0]}</span></td><td>${p.xp}</td><td>${p.level}</td><td>${p.hp}/${p.hpMax}</td>${cdCell}<td>${p.location}</td>${vehCell}${eqCell}</tr>`;
   }).join('');
@@ -737,12 +836,24 @@ const ITEM_DESCS = [
   { name:'Leg Bracers',         cat:'Armor',          desc:'Part orthopedic necessity, part torture. These bad boys scream, I might be made of velcro, but I am still strutting.' },
   // Gear
   { name:'Magic Duct Tape',         cat:'Gear', desc:'Fix cracked armour.' },
+  { name:'Book',                    cat:'Gear', desc:'' },
+  { name:'Xanax',                   cat:'Gear', desc:'' },
   { name:'Slug Slime',              cat:'Gear', desc:'Looks like jello, tastes like boogers. Rub it on your crossbow bolts.' },
   { name:'Shell',                   cat:'Gear', desc:'Throw it like Yoshi.' },
   { name:'Bread and a Plastic Knife', cat:'Gear', desc:'Add peanut butter and you have lunch.' },
   // Clothing
   { name:'Cloak',    cat:'Clothing', desc:'Mysterious. Representing hidden power or exile. Worn by Dracula, Obi-Wan, Dr. Strange, and Marvin the Martian.' },
   { name:'Bracelet', cat:'Clothing', desc:'This hand-beaded masterpiece tells others all they need to know from a distance.' },
+  { name:'Ring of Mystery',           cat:'Clothing', desc:'' },
+  { name:'Ring of Unknown Origin',    cat:'Clothing', desc:'' },
+  { name:'Ring of Sour Milk Smell',   cat:'Clothing', desc:'' },
+  { name:'Ring of Luck or Despair',   cat:'Clothing', desc:'' },
+  // Potions
+  { name:'Strength Potion',        cat:'Potion', desc:'' },
+  { name:'Fire Resistance Potion', cat:'Potion', desc:'' },
+  { name:'Attack Potion',          cat:'Potion', desc:'' },
+  { name:'Poison Potion',          cat:'Potion', desc:'' },
+  { name:'Weakness Potion',        cat:'Potion', desc:'' },
 ];
 
 // --- SPELLS DATA ---
@@ -827,9 +938,9 @@ function filterItems(cat, el) {
   renderItems();
 }
 function renderItems() {
-  const catBadges = { 'Weapon':'bwp', 'Weapon Support':'bwp', 'Armor':'bap', 'Gear':'bsp', 'Clothing':'bsp' };
-  const cats = ['all','Weapon','Weapon Support','Armor','Gear','Clothing'];
-  const labels = { all:'All', 'Weapon':'Weapon', 'Weapon Support':'Support', 'Armor':'Armour', 'Gear':'Gear', 'Clothing':'Clothing' };
+  const catBadges = { 'Weapon':'bwp', 'Weapon Support':'bwp', 'Armor':'bap', 'Gear':'bsp', 'Clothing':'bsp', 'Potion':'bap' };
+  const cats = ['all','Weapon','Weapon Support','Armor','Gear','Clothing','Potion'];
+  const labels = { all:'All', 'Weapon':'Weapon', 'Weapon Support':'Support', 'Armor':'Armour', 'Gear':'Gear', 'Clothing':'Clothing', 'Potion':'Potion' };
   const btns = cats.map(c =>
     `<button class="fbtn ifltr${itemFilter===c?' active':''}" onclick="filterItems('${c}',this)">${labels[c]}</button>`
   ).join('');
