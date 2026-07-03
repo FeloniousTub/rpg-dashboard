@@ -239,14 +239,7 @@ const GS = {
   quest: 'Museum Day 0/13',
   // encounter: set to { title, desc, opponents } when active, else null
   // opponents: [{ name, lvl, hp, hpMax, lineupPos }] — drives the lineup visual together with players[].lineupPos
-  encounter: {
-    title: 'Combat — Roadrunners × 2 · D1',
-    desc: '2× Roadrunner LVL 2 remain.',
-    opponents: [
-      { name: 'Roadrunner', lvl: 2, hp: 14, hpMax: 80, lineupPos: 2 },
-      { name: 'Roadrunner', lvl: 2, hp: 10, hpMax: 80, lineupPos: 3 },
-    ],
-  },
+  encounter: null,
 
   // POINTS OF INTEREST (discovered locations)
   pois: [
@@ -270,18 +263,18 @@ const GS = {
   players: [
     {
       name: 'Marzen', class: 'Kvothe Storyteller', color: '#7F77DD',
-      hp: 89, hpMax: 125, xp: 155, level: 1,
+      hp: 93, hpMax: 125, xp: 395, level: 1,
       location: 'D1', vehicleSeat: null, lineupPos: 2,
       bonusNote: 'Desert D1',
       bonusStyle: 'background:#faeeda;color:#854f0b',
       equipped: [
         { cat: 'WEAPON', name: 'Spear', lvl: 1, qual: 1, stat: 'DMG 4+2' },
       ],
-      sa: { name: 'Kingkiller', desc: 'Handheld weapon +25 for 1 turn', cdTotal: 5, cdLeft: 2 },
+      sa: { name: 'Kingkiller', desc: 'Handheld weapon +25 for 1 turn', cdTotal: 5, cdLeft: 1 },
     },
     {
       name: 'Rakuyo', class: 'Unsullied Warrior', color: '#1D9E75',
-      hp: 209, hpMax: 225, xp: 205, level: 1,
+      hp: 212, hpMax: 250, xp: 445, level: 2,
       location: 'D1', vehicleSeat: null, lineupPos: 1,
       bonusNote: 'Desert D1',
       bonusStyle: 'background:#faeeda;color:#854f0b',
@@ -293,7 +286,7 @@ const GS = {
     },
     {
       name: 'Inked', class: 'Nahri Healer', color: '#D85A30',
-      hp: 60, hpMax: 60, xp: 155, level: 1,
+      hp: 60, hpMax: 60, xp: 395, level: 1,
       location: 'D1', vehicleSeat: null, lineupPos: 4,
       bonusNote: 'Desert D1',
       bonusStyle: 'background:#faeeda;color:#854f0b',
@@ -306,7 +299,7 @@ const GS = {
     },
     {
       name: 'CannonFodder', class: 'Hobbit Adventurer', color: '#BA7517',
-      hp: 142, hpMax: 150, xp: 155, level: 1,
+      hp: 146, hpMax: 150, xp: 395, level: 1,
       location: 'D1', vehicleSeat: null, lineupPos: 3,
       bonusNote: 'Desert D1',
       bonusStyle: 'background:#faeeda;color:#854f0b',
