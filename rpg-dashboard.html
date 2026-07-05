@@ -235,7 +235,7 @@
 const GS = {
 
   // META
-  coins: 280,
+  coins: 251,
   quest: 'Museum Day 0/13',
   // encounter: set to { title, desc, opponents } when active, else null
   // opponents: [{ name, lvl, hp, hpMax, lineupPos }] — drives the lineup visual together with players[].lineupPos
@@ -249,7 +249,7 @@ const GS = {
   // VEHICLE
   vehicle: {
     name: '2002 Honda Civic (Blue)',
-    location: 'D3',
+    location: 'D1',
     upgrades: [],        // e.g. ['GPS', 'CD Player']
   },
 
@@ -263,24 +263,26 @@ const GS = {
   players: [
     {
       name: 'Marzen', class: 'Kvothe Storyteller', color: '#7F77DD',
-      hp: 93, hpMax: 125, xp: 395, level: 1,
+      hp: 125, hpMax: 125, xp: 395, level: 1,
       location: 'D1', vehicleSeat: null, lineupPos: 2,
       bonusNote: 'Desert D1',
       bonusStyle: 'background:#faeeda;color:#854f0b',
       equipped: [
         { cat: 'WEAPON', name: 'Spear', lvl: 1, qual: 1, stat: 'DMG 4+2' },
+        { cat: 'ARMOR', name: 'Shield', lvl: 1, qual: 1, stat: 'DEF 5' },
       ],
-      sa: { name: 'Kingkiller', desc: 'Handheld weapon +25 for 1 turn', cdTotal: 5, cdLeft: 1 },
+      sa: { name: 'Kingkiller', desc: 'Handheld weapon +25 for 1 turn', cdTotal: 5, cdLeft: 0 },
     },
     {
       name: 'Rakuyo', class: 'Unsullied Warrior', color: '#1D9E75',
-      hp: 212, hpMax: 250, xp: 445, level: 2,
+      hp: 250, hpMax: 250, xp: 445, level: 2,
       location: 'D1', vehicleSeat: null, lineupPos: 1,
       bonusNote: 'Desert D1',
       bonusStyle: 'background:#faeeda;color:#854f0b',
       equipped: [
         { cat: 'WEAPON', name: 'Axe-Single Blade', lvl: 1, qual: 1, stat: 'DMG 5' },
         { cat: 'WEAPON', name: 'Brass Knuckles',   lvl: 1, qual: 1, stat: 'DMG 2' },
+        { cat: 'ARMOR', name: 'Shield', lvl: 2, qual: 1, stat: 'DEF 10' },
       ],
       sa: { name: 'Unique Eunuch', desc: 'Weapon & Attack +5 for 2 turns', cdTotal: 5, cdLeft: 0 },
     },
@@ -293,19 +295,20 @@ const GS = {
       equipped: [
         { cat: 'ARMOR', name: 'Boots',     lvl: 1, qual: 1, stat: 'DEF 2' },
         { cat: 'SPELL', name: 'Fireball',  lvl: 1, qual: 1, stat: 'DMG 5' },
-        { cat: 'SPELL', name: 'Lightning', lvl: 1, qual: 1, stat: 'DMG 7' },
+        { cat: 'SPELL', name: 'Lightning', lvl: 1, qual: 1, stat: 'DMG 7', note: 'Not currently active (in reserve)' },
       ],
-      sa: { name: 'Waterproof Bandaid', desc: 'Heal party to full HP — except players on Island terrain healed to half. Not usable in combat.', cdTotal: 8, cdLeft: 0 },
+      sa: { name: 'Waterproof Bandaid', desc: 'Heal party to full HP — except players on Island terrain healed to half. Not usable in combat.', cdTotal: 8, cdLeft: 8 },
     },
     {
       name: 'CannonFodder', class: 'Hobbit Adventurer', color: '#BA7517',
-      hp: 146, hpMax: 150, xp: 395, level: 1,
+      hp: 150, hpMax: 150, xp: 395, level: 1,
       location: 'D1', vehicleSeat: null, lineupPos: 3,
       bonusNote: 'Desert D1',
       bonusStyle: 'background:#faeeda;color:#854f0b',
       equipped: [
         { cat: 'SPELL',  name: 'Fear', lvl: 1, qual: 1, stat: '—', note: 'Prevents flood damage (33% per level)' },
         { cat: 'WEAPON', name: 'Bow',  lvl: 2, qual: 1, stat: '—', note: 'Requires arrows/bolts' },
+        { cat: 'GEAR', name: 'Arrows', lvl: 2, qual: 15, stat: '—', note: 'Ammunition for Bow' },
       ],
       sa: { name: 'My Precious', desc: 'Invisibility + Move +1 for 2 turns', cdTotal: 4, cdLeft: 0 },
     },
