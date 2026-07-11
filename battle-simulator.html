@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPG Battle Simulator</title>
+<style>
+  :root{--bg-primary:#ffffff;--bg-secondary:#f5f5f3;--bg-tertiary:#eeece8;--text-primary:#1a1a18;--text-secondary:#6b6a66;--text-tertiary:#9e9d99;--border-light:rgba(0,0,0,0.10);--border-med:rgba(0,0,0,0.18);--radius-md:8px;--radius-lg:12px;--bg-danger:#fcebeb;--text-danger:#a32d2d;--bg-success:#eaf3de;--text-success:#3b6d11;--bg-info:#e6f1fb;--text-info:#185fa5;--bg-warning:#faeeda;--text-warning:#854f0b;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg-tertiary);color:var(--text-primary);padding:1.5rem;}
+  h1{font-size:20px;font-weight:500;margin-bottom:.25rem;}
+  .subtitle{font-size:13px;color:var(--text-secondary);margin-bottom:1.25rem;}
+  .card{background:var(--bg-primary);border:.5px solid var(--border-light);border-radius:var(--radius-lg);padding:.875rem 1rem;}
+  .stitle{font-size:15px;font-weight:500;margin:1.25rem 0 .75rem;padding-bottom:.4rem;border-bottom:.5px solid var(--border-med);}
+  .stitle:first-child{margin-top:0;}
+  select,input[type=number],button{font-family:inherit;font-size:13px;}
+  select,input[type=number]{padding:5px 8px;border:.5px solid var(--border-med);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary);}
+  input[type=number]{width:72px;}
+  .btn{padding:7px 16px;border:.5px solid var(--border-med);border-radius:var(--radius-md);cursor:pointer;background:var(--bg-primary);color:var(--text-primary);}
+  .btn.primary{background:#1a1a18;color:#fff;border-color:#1a1a18;font-weight:500;}
+  .btn.warn{background:var(--bg-danger);color:var(--text-danger);border-color:#f0b8b8;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:800px){.setup-grid{grid-template-columns:1fr;}}
+  .lane-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--border-light);flex-wrap:wrap;}
+  .lane-row:last-child{border-bottom:none;}
+  .lane-num{width:22px;height:22px;border-radius:50%;background:var(--bg-secondary);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+  .custom-stats{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--text-secondary);}
+  .custom-stats input{width:58px;}
+  .topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;}
+  .pill{display:inline-flex;align-items:center;gap:5px;background:var(--bg-secondary);border-radius:var(--radius-md);padding:5px 12px;font-size:13px;color:var(--text-secondary);}
+  .pill b{color:var(--text-primary);font-weight:500;}
+  .battle-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
+  @media(max-width:900px){.battle-grid{grid-template-columns:1fr;}}
+  .unit{border-radius:var(--radius-md);border:1px solid var(--border-light);background:var(--bg-primary);padding:8px 10px;margin-bottom:8px;}
+  .unit.dead{opacity:.45;background:var(--bg-secondary);}
+  .unit-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+  .unit-name{font-size:13px;font-weight:500;}
+  .unit-sub{font-size:11px;color:var(--text-secondary);}
+  .hpbar{height:6px;border-radius:99px;background:rgba(0,0,0,.08);overflow:hidden;margin-top:5px;}
+  .hpfill{height:100%;border-radius:99px;transition:width .3s;}
+  .hp-edit{cursor:pointer;border-bottom:1px dashed var(--border-med);}
+  .fx{display:inline-block;font-size:10px;padding:1px 6px;border-radius:99px;margin:3px 3px 0 0;font-weight:500;}
+  .fx-bad{background:var(--bg-danger);color:var(--text-danger);}
+  .fx-good{background:var(--bg-success);color:var(--text-success);}
+  .fx-info{background:var(--bg-info);color:var(--text-info);}
+  .action-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;align-items:center;}
+  .action-row select{font-size:12px;padding:4px 6px;max-width:100%;}
+  .sa-toggle{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text-secondary);background:var(--bg-secondary);border-radius:var(--radius-md);padding:4px 8px;cursor:pointer;}
+  .sa-toggle input{margin:0;}
+  .sa-toggle.oncd{background:var(--bg-danger);color:var(--text-danger);cursor:not-allowed;}
+  .logbox{background:var(--bg-primary);border:.5px solid var(--border-light);border-radius:var(--radius-lg);padding:10px 14px;max-height:420px;overflow-y:auto;font-size:12px;line-height:1.7;}
+  .logbox .rnd{font-weight:600;margin-top:8px;border-top:.5px solid var(--border-med);padding-top:8px;}
+  .logbox .rnd:first-child{margin-top:0;border-top:none;padding-top:0;}
+  .log-p{color:#185fa5;}
+  .log-e{color:#a32d2d;}
+  .log-sys{color:var(--text-secondary);}
+  .log-heal{color:#3b6d11;}
+  .log-warn{background:var(--bg-warning);color:var(--text-warning);padding:1px 6px;border-radius:4px;}
+  .banner{border-radius:var(--radius-md);padding:10px 14px;font-size:13px;font-weight:500;margin-bottom:12px;}
+  .banner.win{background:var(--bg-success);color:var(--text-success);}
+  .banner.lose{background:var(--bg-danger);color:var(--text-danger);}
+  details.rules{margin-top:1rem;font-size:12px;color:var(--text-secondary);}
+  details.rules summary{cursor:pointer;font-weight:500;color:var(--text-primary);font-size:13px;}
+  details.rules li{margin:4px 0 4px 18px;}
+  .hint{font-size:11px;color:var(--text-secondary);margin-top:6px;}
+</style>
+</head>
+<body>
+<h1>⚔ Battle Simulator</h1>
+<p class="subtitle">Set your party lanes, pick opposing beasts, then resolve turn by turn. Click any HP number mid-battle to correct it.</p>
+
+<!-- ============ SETUP ============ -->
+<div id="setup">
+  <div class="card" style="margin-bottom:14px">
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+      <label style="font-size:13px">Terrain:
+        <select id="terrainSel">
+          <option>Desert</option><option>Plains</option><option>Island</option>
+          <option>Swamp</option><option>Mountain</option><option selected>Outer Place</option>
+        </select>
+      </label>
+      <label class="sa-toggle" title="Kvothe class bonus: +2 STR when alone in terrain">
+        <input type="checkbox" id="kvotheAlone"> Marzen alone in terrain (+2 STR)
+      </label>
+    </div>
+    <p class="hint">Terrain drives: Unsullied +2 ATK (Desert) · Nahri +1 party Regen (Island) · spell +3/−3 damage adjustments.</p>
+  </div>
+  <div class="setup-grid">
+    <div class="card">
+      <div class="stitle">Your party</div>
+      <div id="partyLanes"></div>
+      <p class="hint">Lane 1 = front line. HP defaults to current dashboard values — edit if needed.</p>
+    </div>
+    <div class="card">
+      <div class="stitle">Opponents</div>
+      <div id="enemyLanes"></div>
+      <p class="hint">Pick beast + level. HP auto-fills from bestiary; override for wounded beasts. "Custom" = manual stats.</p>
+    </div>
+  </div>
+  <div style="margin-top:14px;display:flex;gap:10px">
+    <button class="btn primary" onclick="startBattle()">Start battle ▶</button>
+  </div>
+
+  <details class="rules">
+    <summary>Rules &amp; assumptions used by this simulator</summary>
+    <ul>
+      <li><b>Player weapon damage:</b> (STR + ATK) × (weapon DMG + class weapon bonus) + flat bonuses (special ability, beast weakness).</li>
+      <li><b>Ranged (Bow):</b> (STR + ATK) × arrow DMG. Consumes 1 arrow per shot. Can hit any lane.</li>
+      <li><b>Spell damage:</b> ATK × spell power + terrain adjustment (±3) + beast weakness. Can hit any lane. Spell cooldown applies after cast.</li>
+      <li><b>Beast damage:</b> STR + ATK (confirmed). Deterministic — no dice rolls.</li>
+      <li><b>Defence:</b> flat reduction. Player DEF = class DEF + equipped armour DEF − active debuffs. Minimum damage 0.</li>
+      <li><b>Lineup:</b> melee hits its own lane; if the opposing lane is empty, melee may pick any target (unmatched rule). Beasts hit the player in their lane, else the lowest occupied lane. Invisible players are skipped.</li>
+      <li><b>Turn order:</b> players act first (lane order), then beasts, then bleed effects, then end-of-turn regen. Cooldowns tick down at end of round.</li>
+      <li><b>Boss:</b> enemies skip their attack in round 1 (your free turn to flee/act).</li>
+      <li><b>Kingkiller:</b> flat +25 on the turn's weapon attack (confirmed). <b>Unique Eunuch:</b> +5 weapon &amp; +5 ATK for 2 turns. <b>My Precious:</b> untargetable 2 turns. <b>Waterproof Bandaid:</b> not usable in combat — excluded.</li>
+      <li><b>Beast abilities modelled:</b> Spit Blind (DEF −10, 3 turns, L4+), Piranha Bleed (15 × 3 turns, L3+), Scorpion Bleed (50% next turn / 25% after, L3+ assumed), Dragon Snow (+15 attack, L2+). Unknown L3+ "debuff" is logged but not simulated. Bunyip Fear (15%/lvl) is random in the real game — logged for manual adjudication; use "Pass (feared/stunned)" if it lands.</li>
+    </ul>
+  </details>
+</div>
+
+<!-- ============ BATTLE ============ -->
+<div id="battle" style="display:none">
+  <div id="resultBanner"></div>
+  <div class="topbar">
+    <div class="pill">Round: <b id="roundNum">1</b></div>
+    <div class="pill">Terrain: <b id="terrainShow"></b></div>
+    <button class="btn primary" id="resolveBtn" onclick="resolveRound()">Resolve round ▶</button>
+    <button class="btn" id="undoBtn" onclick="undoRound()" disabled>↩ Undo round</button>
+    <button class="btn warn" onclick="resetSim()">✕ New battle</button>
+  </div>
+  <div class="battle-grid">
+    <div>
+      <div class="stitle" style="color:#185fa5">Your party — choose actions</div>
+      <div id="partySide"></div>
+      <div class="stitle" style="color:#a32d2d">Opponents</div>
+      <div id="enemySide"></div>
+    </div>
+    <div>
+      <div class="stitle">Combat log</div>
+      <div class="logbox" id="logbox"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =============================================================
+//  STATIC GAME DATA
+// =============================================================
+const CLASSES = {
+  'Kvothe Storyteller': { spd:2, str:4, atk:2, def:2, regen:4,  hp:125, wpnBonus:2 },
+  'Unsullied Warrior':  { spd:1, str:3, atk:3, def:3, regen:2,  hp:225, wpnBonus:3 },
+  'Nahri Healer':       { spd:2, str:1, atk:1, def:1, regen:12, hp:60,  wpnBonus:0 },
+  'Hobbit Adventurer':  { spd:3, str:1, atk:2, def:2, regen:4,  hp:150, wpnBonus:0 },
+};
+
+// Current party loadout (mirror of dashboard GS — update when equipment changes)
+const ROSTER = [
+  { name:'Marzen', cls:'Kvothe Storyteller', color:'#7F77DD', hpMax:125,
+    armourDef:5, // Shield L1
+    weapons:[ { name:'Spear L1', dmg:4, weakKey:'Spear' } ],
+    spells:[],
+    sa:{ name:'Kingkiller', kind:'flat25', label:'+25 weapon dmg this turn', dur:1, cd:5 } },
+  { name:'Rakuyo', cls:'Unsullied Warrior', color:'#1D9E75', hpMax:250,
+    armourDef:10, // Shield L2
+    weapons:[ { name:'Axe-Single Blade L1', dmg:5, weakKey:'Axe' },
+              { name:'Brass Knuckles L1', dmg:2, weakKey:'Brass Knuckles' } ],
+    spells:[],
+    sa:{ name:'Unique Eunuch', kind:'buff55', label:'+5 weapon & +5 ATK, 2 turns', dur:2, cd:5 } },
+  { name:'Inked', cls:'Nahri Healer', color:'#D85A30', hpMax:60,
+    armourDef:2, // Boots L1
+    weapons:[],
+    spells:[ { name:'Fireball L1', power:5, cd:2, weakKey:'Fire', tPlus:['Plains'], tMinus:['Desert'] },
+             { name:'Lightning L1', power:7, cd:2, weakKey:'Lightning', tPlus:['Swamp','Island'], tMinus:['Plains'] } ],
+    sa:{ name:'Waterproof Bandaid', kind:'unusable', label:'Not usable in combat', dur:0, cd:8 } },
+  { name:'CannonFodder', cls:'Hobbit Adventurer', color:'#BA7517', hpMax:150,
+    armourDef:0,
+    weapons:[ { name:'Bow L2 + Arrows L2', dmg:2, ranged:true, ammo:15, weakKey:'Bow' } ],
+    spells:[ { name:'Fear L1', power:0, cd:4, effect:'fear', fearDur:1 } ],
+    sa:{ name:'My Precious', kind:'invis', label:'Untargetable 2 turns (only if unseen)', dur:2, cd:4 } },
+];
+
+// weakKey → flat damage bonus vs specific beasts (from bestiary strong/weak)
+const BEASTS = [
+  { name:'Camel', emoji:'🐪', boss:false,
+    stats:{ ATK:[2,4,6,8,10], STR:[8,16,24,32,40], DEF:[12,24,36,48,60], HP:[125,250,375,500,625] },
+    weak:{}, abil:{ spitBlind:4, debuff:3 } },
+  { name:'Roadrunner', emoji:'🐦', boss:false,
+    stats:{ ATK:[3,6,9,12,15], STR:[2,4,6,8,10], DEF:[4,8,12,16,20], HP:[40,80,120,160,200] },
+    weak:{ 'Rocks':3, 'Grenades':-20 }, abil:{ debuff:3 } },
+  { name:'Grey Wolf', emoji:'🐺', boss:false,
+    stats:{ ATK:[6,12,18,24,30], STR:[4,8,12,16,20], DEF:[6,12,18,24,30], HP:[55,110,165,220,275] },
+    weak:{ 'Axe':4 }, abil:{ debuff:3 } },
+  { name:'Otter', emoji:'🦦', boss:false,
+    stats:{ ATK:[2,4,6,8,10], STR:[3,6,9,12,15], DEF:[5,10,15,20,25], HP:[30,60,90,120,150] },
+    weak:{ 'Acid Rain':6 }, abil:{ debuff:3 } },
+  { name:'Stingray', emoji:'🐟', boss:false,
+    stats:{ ATK:[3,6,9,12,15], STR:[3,6,9,12,15], DEF:[4,8,12,16,20], HP:[35,70,105,140,175] },
+    weak:{ 'Spear':10 }, abil:{ spitBlind:4, debuff:3 } },
+  { name:'Bunyip', emoji:'👹', boss:true,
+    stats:{ ATK:[null,null,null,null,35], STR:[null,null,null,null,55], DEF:[null,null,null,null,60], HP:[null,null,null,null,850] },
+    weak:{ 'Spear':10 }, abil:{ debuff:3, fearPct:4 } },
+  { name:'Piranha', emoji:'🐠', boss:false,
+    stats:{ ATK:[6,12,18,24,30], STR:[4,8,12,16,20], DEF:[8,16,24,32,40], HP:[80,160,240,320,400] },
+    weak:{ 'Lightning':5 }, abil:{ bleedFlat:3 } },
+  { name:'Doomslug', emoji:'🐌', boss:false,
+    stats:{ ATK:[5,10,15,20,25], STR:[6,12,18,24,30], DEF:[8,16,24,32,40], HP:[90,180,270,360,450] },
+    weak:{}, abil:{ debuff:3 } },
+  { name:'Scorpion', emoji:'🦂', boss:false,
+    stats:{ ATK:[4,8,12,16,20], STR:[2,4,6,8,10], DEF:[10,20,30,40,50], HP:[35,70,105,140,175] },
+    weak:{}, abil:{ debuff:3, bleedPct:3 } },
+  { name:'Dragon', emoji:'🐉', boss:false,
+    stats:{ ATK:[10,20,30,40,50], STR:[10,20,30,40,50], DEF:[10,20,30,40,50], HP:[150,300,450,600,750] },
+    weak:{ 'Fire':-25 }, abil:{ snow:2, debuff:3 } },
+];
+
+const PARTY_LANES = 4, ENEMY_LANES = 6;
+
+// =============================================================
+//  SETUP UI
+// =============================================================
+function buildSetup() {
+  let ph = '';
+  for (let i = 1; i <= PARTY_LANES; i++) {
+    const opts = ROSTER.map(r => `<option value="${r.name}"${(i-1) < ROSTER.length && ROSTER[i-1].name===r.name ? ' selected':''}>${r.name} (${r.cls.split(' ')[0]})</option>`).join('');
+    ph += `<div class="lane-row"><div class="lane-num">${i}</div>
+      <select id="pl${i}"><option value="">— empty —</option>${opts}</select>
+      HP <input type="number" id="plhp${i}" min="0" value="${ROSTER[i-1] ? ROSTER[i-1].hpMax : ''}">
+    </div>`;
+  }
+  document.getElementById('partyLanes').innerHTML = ph;
+
+  let eh = '';
+  for (let i = 1; i <= ENEMY_LANES; i++) {
+    const opts = BEASTS.map(b => `<option value="${b.name}">${b.emoji} ${b.name}${b.boss?' (BOSS)':''}</option>`).join('');
+    eh += `<div class="lane-row"><div class="lane-num">${i}</div>
+      <select id="en${i}" onchange="enemyChanged(${i})"><option value="">— empty —</option>${opts}<option value="__custom">✏ Custom…</option></select>
+      <select id="enlvl${i}" onchange="enemyChanged(${i})"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+      HP <input type="number" id="enhp${i}" min="0">
+      <span class="custom-stats" id="encust${i}" style="display:none">
+        ATK <input type="number" id="enatk${i}" value="5"> STR <input type="number" id="enstr${i}" value="5">
+        DEF <input type="number" id="endef${i}" value="5">
+      </span>
+      <span class="hint" id="enstat${i}"></span>
+    </div>`;
+  }
+  document.getElementById('enemyLanes').innerHTML = eh;
+}
+function enemyChanged(i) {
+  const name = document.getElementById('en'+i).value;
+  const lvl = +document.getElementById('enlvl'+i).value;
+  const cust = document.getElementById('encust'+i);
+  const statEl = document.getElementById('enstat'+i);
+  if (name === '__custom') { cust.style.display='inline-flex'; statEl.textContent=''; return; }
+  cust.style.display='none';
+  const b = BEASTS.find(x => x.name === name);
+  if (!b) { statEl.textContent=''; document.getElementById('enhp'+i).value=''; return; }
+  const hp = b.stats.HP[lvl-1], atk = b.stats.ATK[lvl-1], str = b.stats.STR[lvl-1], def = b.stats.DEF[lvl-1];
+  if (hp === null) { statEl.innerHTML = '<span style="color:#a32d2d">No data for this level</span>'; document.getElementById('enhp'+i).value=''; return; }
+  document.getElementById('enhp'+i).value = hp;
+  statEl.textContent = `ATK ${atk} · STR ${str} · DEF ${def}`;
+}
+
+// =============================================================
+//  BATTLE STATE
+// =============================================================
+let S = null;          // battle state
+let history = [];      // undo snapshots
+
+function startBattle() {
+  const terrain = document.getElementById('terrainSel').value;
+  const kvotheAlone = document.getElementById('kvotheAlone').checked;
+  const party = [], enemies = [];
+  for (let i = 1; i <= PARTY_LANES; i++) {
+    const nm = document.getElementById('pl'+i).value;
+    if (!nm) continue;
+    const r = ROSTER.find(x => x.name === nm);
+    if (party.some(p => p.name === nm)) { alert(nm + ' is in two lanes.'); return; }
+    const hp = Math.max(1, +document.getElementById('plhp'+i).value || r.hpMax);
+    const c = CLASSES[r.cls];
+    party.push({
+      lane:i, name:r.name, cls:r.cls, color:r.color,
+      hp:Math.min(hp, r.hpMax), hpMax:r.hpMax,
+      str:c.str, atk:c.atk, def:c.def, regen:c.regen, wpnBonus:c.wpnBonus,
+      armourDef:r.armourDef,
+      weapons:JSON.parse(JSON.stringify(r.weapons)),
+      spells:JSON.parse(JSON.stringify(r.spells)),
+      sa:{...r.sa}, saCd:0, spellCds:{},
+      fx:{ invis:0, buffTurns:0, defDebuff:[], bleeds:[] },
+      alive:true,
+    });
+  }
+  for (let i = 1; i <= ENEMY_LANES; i++) {
+    const nm = document.getElementById('en'+i).value;
+    if (!nm) continue;
+    let unit;
+    if (nm === '__custom') {
+      const hp = +document.getElementById('enhp'+i).value || 100;
+      unit = { lane:i, name:'Custom beast', emoji:'❓', lvl:+document.getElementById('enlvl'+i).value,
+        hp, hpMax:hp, atk:+document.getElementById('enatk'+i).value||0, str:+document.getElementById('enstr'+i).value||0,
+        def:+document.getElementById('endef'+i).value||0, boss:false, weak:{}, abil:{} };
+    } else {
+      const b = BEASTS.find(x => x.name === nm);
+      const lvl = +document.getElementById('enlvl'+i).value;
+      if (b.stats.HP[lvl-1] === null) { alert(`${b.name} has no data at level ${lvl}.`); return; }
+      const hpMax = b.stats.HP[lvl-1];
+      const hp = Math.max(1, Math.min(+document.getElementById('enhp'+i).value || hpMax, hpMax));
+      unit = { lane:i, name:b.name, emoji:b.emoji, lvl,
+        hp, hpMax, atk:b.stats.ATK[lvl-1], str:b.stats.STR[lvl-1], def:b.stats.DEF[lvl-1],
+        boss:b.boss, weak:{...b.weak}, abil:{...b.abil} };
+    }
+    unit.fx = { feared:0, defDebuff:[], bleeds:[] };
+    unit.alive = true;
+    enemies.push(unit);
+  }
+  if (!party.length || !enemies.length) { alert('Need at least one player and one beast.'); return; }
+
+  S = { terrain, kvotheAlone, round:1, party, enemies, log:[], over:false };
+  history = [];
+  logSys(`Battle begins — ${terrain} terrain. Party: ${party.map(p=>p.name).join(', ')} vs ${enemies.map(e=>`${e.name} L${e.lvl}`).join(', ')}.`);
+  if (enemies.some(e => e.boss)) logSys('👹 BOSS present — enemies will not attack in round 1 (your free turn to flee or act).');
+  if (terrain === 'Desert' && party.some(p => p.cls === 'Unsullied Warrior')) logSys('Desert: Rakuyo gains +2 ATK.');
+  if (terrain === 'Island' && party.some(p => p.cls === 'Nahri Healer')) logSys('Island: whole party gains +1 Regen (Nahri bonus).');
+  if (kvotheAlone) logSys('Marzen alone in terrain: +2 STR.');
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('battle').style.display = 'block';
+  document.getElementById('terrainShow').textContent = terrain;
+  render();
+}
+
+// effective stats
+function effStr(p) { let s = p.str; if (S.kvotheAlone && p.cls==='Kvothe Storyteller') s += 2; return s; }
+function effAtk(p) { let a = p.atk; if (S.terrain==='Desert' && p.cls==='Unsullied Warrior') a += 2; if (p.fx.buffTurns>0) a += 5; return a; }
+function effDefP(p) { return Math.max(0, p.def + p.armourDef - p.fx.defDebuff.reduce((t,d)=>t+d.amt,0)); }
+function effDefE(e) { return Math.max(0, e.def - e.fx.defDebuff.reduce((t,d)=>t+d.amt,0)); }
+function effRegen(p) { let r = p.regen; if (S.terrain==='Island' && S.party.some(q=>q.alive && q.cls==='Nahri Healer')) r += 1; return r; }
+
+// =============================================================
+//  RENDER
+// =============================================================
+function hpColor(pct){ return pct>60 ? '#3b6d11' : pct>30 ? '#854f0b' : '#a32d2d'; }
+
+function fxTags(u, isPlayer) {
+  let t = '';
+  if (isPlayer) {
+    if (u.fx.invis>0) t += `<span class="fx fx-info">👻 invisible ${u.fx.invis}t</span>`;
+    if (u.fx.buffTurns>0) t += `<span class="fx fx-good">+5 wpn/atk ${u.fx.buffTurns}t</span>`;
+  } else {
+    if (u.fx.feared>0) t += `<span class="fx fx-info">😱 feared ${u.fx.feared}t</span>`;
+  }
+  u.fx.defDebuff.forEach(d => t += `<span class="fx fx-bad">DEF −${d.amt} (${d.turns}t)</span>`);
+  u.fx.bleeds.forEach(b => t += `<span class="fx fx-bad">🩸 bleed ${b.amounts[0]}${b.amounts.length>1?'→'+b.amounts.slice(1).join('→'):''}</span>`);
+  return t;
+}
+
+function render() {
+  document.getElementById('roundNum').textContent = S.round;
+  document.getElementById('undoBtn').disabled = history.length === 0;
+  document.getElementById('resolveBtn').disabled = S.over;
+
+  // party side
+  let ph = '';
+  S.party.forEach((p, pi) => {
+    const pct = Math.max(0, Math.round(p.hp/p.hpMax*100));
+    let body = `<div class="unit-head">
+      <div><span class="lane-num" style="display:inline-flex;margin-right:6px">${p.lane}</span>
+        <span class="unit-name" style="color:${p.color}">${p.name}</span>
+        <span class="unit-sub"> ${p.cls.split(' ')[0]} · STR ${effStr(p)} · ATK ${effAtk(p)} · DEF ${effDefP(p)} · Regen ${effRegen(p)}</span></div>
+      <span class="unit-sub"><span class="hp-edit" onclick="editHp('p',${pi})">${p.hp}</span>/${p.hpMax} HP</span>
+    </div>
+    <div class="hpbar"><div class="hpfill" style="width:${pct}%;background:${hpColor(pct)}"></div></div>
+    <div>${fxTags(p, true)}</div>`;
+    if (p.alive && !S.over) {
+      // action select
+      let opts = '';
+      p.weapons.forEach((w, wi) => {
+        const ammoStr = w.ammo !== undefined ? ` (${w.ammo} left)` : '';
+        const dis = w.ammo !== undefined && w.ammo <= 0;
+        opts += `<option value="w${wi}"${dis?' disabled':''}>⚔ ${w.name}${ammoStr}</option>`;
+      });
+      p.spells.forEach((sp, si) => {
+        const cd = p.spellCds[sp.name] || 0;
+        opts += `<option value="s${si}"${cd>0?' disabled':''}>✨ ${sp.name}${cd>0?` (CD ${cd})`:''}</option>`;
+      });
+      opts += `<option value="pass">— Pass (feared/stunned/skip)</option>`;
+      const tOpts = targetOptions(p);
+      const saUsable = p.sa.kind !== 'unusable' && p.saCd === 0;
+      const saTag = p.sa.kind === 'unusable'
+        ? `<span class="sa-toggle oncd" title="${p.sa.label}">✕ ${p.sa.name}</span>`
+        : p.saCd > 0
+          ? `<span class="sa-toggle oncd">⏳ ${p.sa.name} CD ${p.saCd}</span>`
+          : `<label class="sa-toggle" title="${p.sa.label}"><input type="checkbox" id="sa${pi}"> ⭐ ${p.sa.name}</label>`;
+      body += `<div class="action-row">
+        <select id="act${pi}" onchange="render_target(${pi})">${opts}</select>
+        <select id="tgt${pi}">${tOpts}</select>
+        ${saTag}
+      </div>`;
+    } else if (!p.alive) {
+      body += `<div class="unit-sub" style="margin-top:5px">☠ Dead</div>`;
+    }
+    ph += `<div class="unit${p.alive?'':' dead'}" style="border-left:3px solid ${p.color}">${body}</div>`;
+  });
+  document.getElementById('partySide').innerHTML = ph;
+
+  // restore selections keep default; enemy side
+  let eh = '';
+  S.enemies.forEach((e, ei) => {
+    const pct = Math.max(0, Math.round(e.hp/e.hpMax*100));
+    eh += `<div class="unit${e.alive?'':' dead'}" style="border-left:3px solid #a32d2d">
+      <div class="unit-head">
+        <div><span class="lane-num" style="display:inline-flex;margin-right:6px">${e.lane}</span>
+          <span class="unit-name">${e.emoji} ${e.name} <span class="unit-sub">L${e.lvl}${e.boss?' · BOSS':''} · ATK ${e.atk} · STR ${e.str} · DEF ${effDefE(e)} · hits for ${e.str+e.atk}</span></span></div>
+        <span class="unit-sub"><span class="hp-edit" onclick="editHp('e',${ei})">${e.hp}</span>/${e.hpMax} HP</span>
+      </div>
+      <div class="hpbar"><div class="hpfill" style="width:${pct}%;background:${hpColor(pct)}"></div></div>
+      <div>${fxTags(e, false)}</div>
+      ${e.alive?'':'<div class="unit-sub" style="margin-top:5px">☠ Dead</div>'}
+    </div>`;
+  });
+  document.getElementById('enemySide').innerHTML = eh;
+
+  renderLog();
+}
+
+function targetOptions(p, actionVal) {
+  const act = actionVal !== undefined ? actionVal : null;
+  // melee restriction: own lane, unless opposing lane empty → any
+  const aliveE = S.enemies.filter(e => e.alive);
+  let allowed = aliveE;
+  let isMelee = true;
+  if (act && act.startsWith('s')) isMelee = false;
+  if (act && act.startsWith('w')) {
+    const w = p.weapons[+act.slice(1)];
+    if (w && w.ranged) isMelee = false;
+  }
+  if (act === null) {
+    // default = first weapon or spell; compute melee-ness of first option
+    if (p.weapons.length) isMelee = !p.weapons[0].ranged;
+    else isMelee = false;
+  }
+  if (isMelee) {
+    const sameLane = aliveE.filter(e => e.lane === p.lane);
+    if (sameLane.length) allowed = sameLane;   // must hit own lane
+    // else lane empty → unmatched, any target allowed
+  }
+  return allowed.map(e => `<option value="${e.lane}">${e.emoji} ${e.name} L${e.lvl} (lane ${e.lane})</option>`).join('');
+}
+function render_target(pi) {
+  const p = S.party[pi];
+  const act = document.getElementById('act'+pi).value;
+  document.getElementById('tgt'+pi).innerHTML = targetOptions(p, act);
+}
+
+function renderLog() {
+  const el = document.getElementById('logbox');
+  el.innerHTML = S.log.join('');
+  el.scrollTop = el.scrollHeight;
+}
+function log(html){ S.log.push(`<div>${html}</div>`); }
+function logSys(t){ S.log.push(`<div class="log-sys">${t}</div>`); }
+function logRound(n){ S.log.push(`<div class="rnd">— Round ${n} —</div>`); }
+
+function editHp(side, i) {
+  const u = side==='p' ? S.party[i] : S.enemies[i];
+  const v = prompt(`Set HP for ${u.name} (0–${u.hpMax}):`, u.hp);
+  if (v === null) return;
+  const hp = Math.max(0, Math.min(u.hpMax, Math.round(+v)));
+  if (isNaN(hp)) return;
+  u.hp = hp;
+  if (hp <= 0) { u.alive = false; }
+  else u.alive = true;
+  logSys(`✎ Manual edit: ${u.name} HP set to ${hp}.`);
+  checkEnd();
+  render();
+}
+
+// =============================================================
+//  RESOLUTION
+// =============================================================
+function snapshot(){ history.push(JSON.stringify(S)); if (history.length>30) history.shift(); }
+function undoRound(){ if (!history.length) return; S = JSON.parse(history.pop()); document.getElementById('resultBanner').innerHTML = S.over ? document.getElementById('resultBanner').innerHTML : ''; if (!S.over) document.getElementById('resultBanner').innerHTML=''; render(); }
+
+function weaknessBonus(enemy, weakKey) {
+  if (!weakKey || !(weakKey in enemy.weak)) return 0;
+  return enemy.weak[weakKey];
+}
+
+function dealToEnemy(e, dmg, srcHtml) {
+  const def = effDefE(e);
+  const net = Math.max(0, dmg - def);
+  e.hp = Math.max(0, e.hp - net);
+  log(`${srcHtml} − DEF ${def} = <b>${net} dmg</b> → ${e.emoji} ${e.name} ${e.hp}/${e.hpMax} HP${e.hp===0?' ☠':''}`);
+  if (e.hp === 0 && e.alive) { e.alive = false; log(`<span class="log-p">☠ ${e.name} L${e.lvl} is slain!</span>`); }
+  return net;
+}
+function dealToPlayer(p, dmg, srcHtml) {
+  const def = effDefP(p);
+  const net = Math.max(0, dmg - def);
+  p.hp = Math.max(0, p.hp - net);
+  log(`${srcHtml} − DEF ${def} = <b>${net} dmg</b> → ${p.name} ${p.hp}/${p.hpMax} HP${p.hp===0?' ☠':''}`);
+  if (p.hp === 0 && p.alive) { p.alive = false; log(`<span class="log-e">☠ ${p.name} has fallen!</span>`); }
+  return net;
+}
+
+function resolveRound() {
+  if (S.over) return;
+  snapshot();
+  logRound(S.round);
+
+  // ---- read chosen actions before mutating ----
+  const actions = S.party.map((p, pi) => {
+    if (!p.alive) return null;
+    const actEl = document.getElementById('act'+pi);
+    if (!actEl) return null;
+    const act = actEl.value;
+    const tgtEl = document.getElementById('tgt'+pi);
+    const tgtLane = tgtEl && tgtEl.value ? +tgtEl.value : null;
+    const saEl = document.getElementById('sa'+pi);
+    return { act, tgtLane, useSa: !!(saEl && saEl.checked) };
+  });
+
+  // ---- player phase (lane order) ----
+  S.party.forEach((p, pi) => {
+    const a = actions[pi];
+    if (!p.alive || !a) return;
+
+    // activate SA
+    let flatSa = 0;
+    if (a.useSa && p.saCd === 0) {
+      if (p.sa.kind === 'flat25') { flatSa = 25; p.saCd = p.sa.cd; log(`<span class="log-p">⭐ ${p.name} activates <b>${p.sa.name}</b> (+25 this attack)!</span>`); }
+      else if (p.sa.kind === 'buff55') { p.fx.buffTurns = 2; p.saCd = p.sa.cd; log(`<span class="log-p">⭐ ${p.name} activates <b>${p.sa.name}</b> (+5 weapon & ATK, 2 turns)!</span>`); }
+      else if (p.sa.kind === 'invis') { p.fx.invis = 2; p.saCd = p.sa.cd; log(`<span class="log-p">⭐ ${p.name} activates <b>${p.sa.name}</b> — invisible for 2 turns (only valid if opponent hasn't seen you).</span>`); }
+    }
+
+    if (a.act === 'pass') { log(`<span class="log-sys">${p.name} passes.</span>`); return; }
+
+    const target = S.enemies.find(e => e.lane === a.tgtLane && e.alive) || S.enemies.find(e => e.alive);
+    if (!target) return;
+
+    if (a.act.startsWith('w')) {
+      const w = p.weapons[+a.act.slice(1)];
+      if (!w) return;
+      if (w.ammo !== undefined) {
+        if (w.ammo <= 0) { log(`<span class="log-sys">${p.name} is out of ammo!</span>`); return; }
+        w.ammo -= 1;
+      }
+      const str = effStr(p), atk = effAtk(p);
+      const buffW = p.fx.buffTurns > 0 ? 5 : 0;
+      const weak = weaknessBonus(target, w.weakKey);
+      let base, formula;
+      if (w.ranged) {
+        base = (str + atk) * (w.dmg + buffW);
+        formula = `(STR ${str} + ATK ${atk}) × arrow ${w.dmg}${buffW?`+${buffW}`:''} = ${base}`;
+      } else {
+        base = (str + atk) * (w.dmg + p.wpnBonus + buffW);
+        formula = `(STR ${str} + ATK ${atk}) × (wpn ${w.dmg}${p.wpnBonus?` + class ${p.wpnBonus}`:''}${buffW?` + buff ${buffW}`:''}) = ${base}`;
+      }
+      let total = base + flatSa + weak;
+      let extras = '';
+      if (flatSa) extras += ` + SA 25`;
+      if (weak) extras += ` ${weak>0?'+':'−'} weakness ${Math.abs(weak)}`;
+      dealToEnemy(target, total, `<span class="log-p">${p.name}</span> ⚔ ${w.name}: ${formula}${extras}${extras?` = ${total}`:''}`);
+    }
+    else if (a.act.startsWith('s')) {
+      const sp = p.spells[+a.act.slice(1)];
+      if (!sp) return;
+      if ((p.spellCds[sp.name]||0) > 0) return;
+      p.spellCds[sp.name] = sp.cd;
+      if (sp.effect === 'fear') {
+        target.fx.feared = Math.max(target.fx.feared, sp.fearDur + 0);
+        log(`<span class="log-p">${p.name}</span> ✨ ${sp.name}: ${target.emoji} ${target.name} is feared — skips its next turn.`);
+        return;
+      }
+      const atk = effAtk(p);
+      let terrAdj = 0;
+      if (sp.tPlus && sp.tPlus.includes(S.terrain)) terrAdj = 3;
+      if (sp.tMinus && sp.tMinus.includes(S.terrain)) terrAdj = -3;
+      const weak = weaknessBonus(target, sp.weakKey);
+      const base = atk * sp.power;
+      const total = base + terrAdj + weak;
+      let extras = '';
+      if (terrAdj) extras += ` ${terrAdj>0?'+':'−'} terrain ${Math.abs(terrAdj)}`;
+      if (weak) extras += ` ${weak>0?'+':'−'} weakness ${Math.abs(weak)}`;
+      dealToPlayerSpell(p, sp, target, base, total, extras, atk);
+    }
+  });
+
+  // ---- beast phase ----
+  const bossFreeTurn = S.round === 1 && S.enemies.some(e => e.boss);
+  if (bossFreeTurn) {
+    logSys('👹 Boss free turn — enemies do not attack this round.');
+  } else {
+    S.enemies.forEach(e => {
+      if (!e.alive) return;
+      if (e.fx.feared > 0) { log(`<span class="log-sys">${e.emoji} ${e.name} is feared and skips its turn.</span>`); return; }
+      // target: player in same lane else lowest occupied lane; skip invisible
+      const candidates = S.party.filter(p => p.alive && p.fx.invis === 0);
+      if (!candidates.length) { log(`<span class="log-sys">${e.emoji} ${e.name} finds no visible target.</span>`); return; }
+      let tgt = candidates.find(p => p.lane === e.lane);
+      if (!tgt) tgt = candidates.sort((a,b) => a.lane - b.lane)[0];
+      let dmg = e.str + e.atk;
+      let formula = `STR ${e.str} + ATK ${e.atk} = ${dmg}`;
+      // Dragon snow
+      if (e.abil.snow && e.lvl >= e.abil.snow) { dmg += 15; formula += ` + Snow 15 = ${dmg}`; }
+      const net = dealToPlayer(tgt, dmg, `<span class="log-e">${e.emoji} ${e.name} L${e.lvl}</span> attacks ${tgt.name}: ${formula}`);
+      // on-hit abilities
+      if (net > 0 && tgt.alive) {
+        if (e.abil.spitBlind && e.lvl >= e.abil.spitBlind) {
+          tgt.fx.defDebuff.push({ amt:10, turns:3 });
+          log(`<span class="log-e">💦 Spit Blind:</span> ${tgt.name} DEF −10 for 3 turns.`);
+        }
+        if (e.abil.bleedFlat && e.lvl >= e.abil.bleedFlat) {
+          tgt.fx.bleeds.push({ amounts:[15,15,15] });
+          log(`<span class="log-e">🩸 Bleed:</span> ${tgt.name} bleeds 15/turn for 3 turns.`);
+        }
+        if (e.abil.bleedPct && e.lvl >= e.abil.bleedPct) {
+          const b1 = Math.round(net*0.5), b2 = Math.round(net*0.25);
+          tgt.fx.bleeds.push({ amounts:[b1,b2] });
+          log(`<span class="log-e">🩸 Bleed:</span> ${tgt.name} bleeds ${b1} next turn, ${b2} the turn after (stacks).`);
+        }
+        if (e.abil.debuff && e.lvl >= e.abil.debuff) {
+          log(`<span class="log-warn">⚠ ${e.name} L${e.lvl} applies a DEBUFF — effect unknown, not simulated. Check with admin.</span>`);
+        }
+        if (e.abil.fearPct && e.lvl >= e.abil.fearPct) {
+          log(`<span class="log-warn">⚠ ${e.name} FEAR: ${15*e.lvl}% chance ${tgt.name} is feared — random in real game. If it lands, choose "Pass" for them next round.</span>`);
+        }
+      }
+    });
+  }
+
+  // ---- bleed phase ----
+  [...S.party, ...S.enemies].forEach(u => {
+    if (!u.alive || !u.fx.bleeds.length) return;
+    let total = 0;
+    u.fx.bleeds.forEach(b => { total += b.amounts.shift(); });
+    u.fx.bleeds = u.fx.bleeds.filter(b => b.amounts.length);
+    if (total > 0) {
+      u.hp = Math.max(0, u.hp - total);
+      const nm = u.emoji ? `${u.emoji} ${u.name}` : u.name;
+      log(`<span class="log-e">🩸 ${nm} bleeds for ${total}</span> → ${u.hp}/${u.hpMax} HP${u.hp===0?' ☠':''}`);
+      if (u.hp === 0) { u.alive = false; log(`<span class="log-e">☠ ${nm} bleeds out!</span>`); }
+    }
+  });
+
+  // ---- regen phase (players only) ----
+  S.party.forEach(p => {
+    if (!p.alive || p.hp >= p.hpMax) return;
+    const r = effRegen(p);
+    const healed = Math.min(r, p.hpMax - p.hp);
+    p.hp += healed;
+    log(`<span class="log-heal">💚 ${p.name} regenerates +${healed}</span> → ${p.hp}/${p.hpMax} HP`);
+  });
+
+  // ---- tick durations & cooldowns ----
+  S.party.forEach(p => {
+    if (p.saCd > 0) p.saCd -= 1;
+    Object.keys(p.spellCds).forEach(k => { if (p.spellCds[k] > 0) p.spellCds[k] -= 1; });
+    if (p.fx.buffTurns > 0) p.fx.buffTurns -= 1;
+    if (p.fx.invis > 0) p.fx.invis -= 1;
+    p.fx.defDebuff.forEach(d => d.turns -= 1);
+    p.fx.defDebuff = p.fx.defDebuff.filter(d => d.turns > 0);
+  });
+  S.enemies.forEach(e => {
+    if (e.fx.feared > 0) e.fx.feared -= 1;
+    e.fx.defDebuff.forEach(d => d.turns -= 1);
+    e.fx.defDebuff = e.fx.defDebuff.filter(d => d.turns > 0);
+  });
+
+  S.round += 1;
+  checkEnd();
+  render();
+}
+
+// player spell damage helper (kept separate for clean log text)
+function dealToPlayerSpell(p, sp, target, base, total, extras, atk) {
+  dealToEnemy(target, total, `<span class="log-p">${p.name}</span> ✨ ${sp.name}: ATK ${atk} × power ${sp.power} = ${base}${extras}${extras?` = ${total}`:''}`);
+}
+
+function checkEnd() {
+  if (!S) return;
+  const pAlive = S.party.some(p => p.alive);
+  const eAlive = S.enemies.some(e => e.alive);
+  const rb = document.getElementById('resultBanner');
+  if (!eAlive) {
+    S.over = true;
+    rb.innerHTML = '<div class="banner win">🏆 Victory! All beasts are slain.</div>';
+    logSys('🏆 VICTORY — all opponents defeated.');
+  } else if (!pAlive) {
+    S.over = true;
+    rb.innerHTML = '<div class="banner lose">☠ Defeat — the whole party has fallen.</div>';
+    logSys('☠ DEFEAT — all players are down.');
+  } else {
+    S.over = false;
+    rb.innerHTML = '';
+  }
+}
+
+function resetSim() {
+  if (S && !S.over && !confirm('Abandon current battle?')) return;
+  S = null; history = [];
+  document.getElementById('battle').style.display = 'none';
+  document.getElementById('resultBanner').innerHTML = '';
+  document.getElementById('setup').style.display = 'block';
+}
+
+buildSetup();
+</script>
+</body>
+</html>
