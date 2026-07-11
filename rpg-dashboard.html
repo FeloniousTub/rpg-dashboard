@@ -426,9 +426,9 @@ const GS = {
       terrain: 'Desert', mob: '3-5',
       stats: { ATK:[4,8,12,16,20], STR:[2,4,6,8,10], DEF:[10,20,30,40,50], HP:[35,70,105,140,175] },
       abilities: [
-        { label:'WEAPON — LVL 1+', desc:'Uses a weapon attack', danger:false },
-        { label:'DEBUFF — LVL 3+', desc:'Applies a debuff on hit', danger:true },
-        { label:'BLEED — LVL 4+', desc:'Bleed <b>3 × 3 turns</b>', danger:true },
+        { label:'WEAPON', desc:'Uses a weapon attack', danger:false },
+        { label:'DEBUFF', desc:'Applies a debuff on hit', danger:true },
+        { label:'BLEED', desc:'50% of the triggering hit\'s damage lands next turn, 25% the turn after — stacks if hit again while bleeding. Level threshold not confirmed.', danger:true },
       ],
       strong: null, weak: null,
     },
