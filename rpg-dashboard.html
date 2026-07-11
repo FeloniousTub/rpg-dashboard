@@ -264,9 +264,9 @@ const GS = {
     {
       name: 'Marzen', class: 'Kvothe Storyteller', color: '#7F77DD',
       hp: 125, hpMax: 125, xp: 395, level: 1,
-      location: 'D1', vehicleSeat: null, lineupPos: 2,
-      bonusNote: 'Desert D1',
-      bonusStyle: 'background:#faeeda;color:#854f0b',
+      location: 'OP12', vehicleSeat: null, lineupPos: null,
+      bonusNote: 'Outer Place OP12 — no terrain bonus',
+      bonusStyle: 'background:#f5f5f3;color:#6b6a66',
       equipped: [
         { cat: 'WEAPON', name: 'Spear', lvl: 1, qual: 1, stat: 'DMG 4+2' },
         { cat: 'ARMOR', name: 'Shield', lvl: 1, qual: 1, stat: 'DEF 5' },
@@ -276,9 +276,9 @@ const GS = {
     {
       name: 'Rakuyo', class: 'Unsullied Warrior', color: '#1D9E75',
       hp: 250, hpMax: 250, xp: 445, level: 2,
-      location: 'D1', vehicleSeat: null, lineupPos: 1,
-      bonusNote: 'Desert D1',
-      bonusStyle: 'background:#faeeda;color:#854f0b',
+      location: 'OP12', vehicleSeat: null, lineupPos: null,
+      bonusNote: 'Outer Place OP12 — no terrain bonus',
+      bonusStyle: 'background:#f5f5f3;color:#6b6a66',
       equipped: [
         { cat: 'WEAPON', name: 'Axe-Single Blade', lvl: 1, qual: 1, stat: 'DMG 5' },
         { cat: 'WEAPON', name: 'Brass Knuckles',   lvl: 1, qual: 1, stat: 'DMG 2' },
@@ -289,22 +289,22 @@ const GS = {
     {
       name: 'Inked', class: 'Nahri Healer', color: '#D85A30',
       hp: 60, hpMax: 60, xp: 395, level: 1,
-      location: 'D1', vehicleSeat: null, lineupPos: 4,
-      bonusNote: 'Desert D1',
-      bonusStyle: 'background:#faeeda;color:#854f0b',
+      location: 'OP12', vehicleSeat: null, lineupPos: null,
+      bonusNote: 'Outer Place OP12 — no terrain bonus',
+      bonusStyle: 'background:#f5f5f3;color:#6b6a66',
       equipped: [
         { cat: 'ARMOR', name: 'Boots',     lvl: 1, qual: 1, stat: 'DEF 2' },
         { cat: 'SPELL', name: 'Fireball',  lvl: 1, qual: 1, stat: 'DMG 5' },
         { cat: 'SPELL', name: 'Lightning', lvl: 1, qual: 1, stat: 'DMG 7', note: 'Not currently active (in reserve)' },
       ],
-      sa: { name: 'Waterproof Bandaid', desc: 'Heal party to full HP — except players on Island terrain healed to half. Not usable in combat.', cdTotal: 8, cdLeft: 8 },
+      sa: { name: 'Waterproof Bandaid', desc: 'Heal party to full HP — except players on Island terrain healed to half. Not usable in combat.', cdTotal: 8, cdLeft: 2 },
     },
     {
       name: 'CannonFodder', class: 'Hobbit Adventurer', color: '#BA7517',
       hp: 150, hpMax: 150, xp: 395, level: 1,
-      location: 'D1', vehicleSeat: null, lineupPos: 3,
-      bonusNote: 'Desert D1',
-      bonusStyle: 'background:#faeeda;color:#854f0b',
+      location: 'OP12', vehicleSeat: null, lineupPos: null,
+      bonusNote: 'Outer Place OP12 — no terrain bonus',
+      bonusStyle: 'background:#f5f5f3;color:#6b6a66',
       equipped: [
         { cat: 'SPELL',  name: 'Fear', lvl: 1, qual: 1, stat: '—', note: 'Prevents flood damage (33% per level)' },
         { cat: 'WEAPON', name: 'Bow',  lvl: 2, qual: 1, stat: '—', note: 'Requires arrows/bolts' },
@@ -419,6 +419,30 @@ const GS = {
         { label:'DEBUFF — LVL 3+', desc:'Applies a debuff on hit', danger:true },
       ],
       strong: null, weak: null,
+    },
+    {
+      emoji: '🦂', name: 'Scorpion', boss: false,
+      desc: 'Pinchy little bastard, tastes good deep fried and dipped in cocktail sauce.',
+      terrain: 'Desert', mob: '3-5',
+      stats: { ATK:[4,8,12,16,20], STR:[2,4,6,8,10], DEF:[10,20,30,40,50], HP:[35,70,105,140,175] },
+      abilities: [
+        { label:'WEAPON — LVL 1+', desc:'Uses a weapon attack', danger:false },
+        { label:'DEBUFF — LVL 3+', desc:'Applies a debuff on hit', danger:true },
+        { label:'BLEED — LVL 4+', desc:'Bleed <b>3 × 3 turns</b>', danger:true },
+      ],
+      strong: null, weak: null,
+    },
+    {
+      emoji: '🐉', name: 'Dragon', boss: false,
+      desc: 'Winged, large, scaly. Dragons will carry you into battle, or guard your gold. Versatile. Caution, contents may be hot.',
+      terrain: 'Outer Place', mob: '1',
+      stats: { ATK:[10,20,30,40,50], STR:[10,20,30,40,50], DEF:[10,20,30,40,50], HP:[150,300,450,600,750] },
+      abilities: [
+        { label:'WEAPON — LVL 1+', desc:'Uses a weapon attack', danger:false },
+        { label:'SNOW — LVL 2+', desc:'Applies Snow effect, <b>+15</b>', danger:true },
+        { label:'DEBUFF — LVL 3+', desc:'Applies a debuff on hit', danger:true },
+      ],
+      strong: 'Fire <b>(-25 damage)</b>', weak: null,
     },
   ],
 };
