@@ -235,21 +235,29 @@
 const GS = {
 
   // META
-  coins: 251,
-  quest: 'Museum Day 0/13',
+  coins: 649,
+  quest: 'Museum Day 1/13',
   // encounter: set to { title, desc, opponents } when active, else null
   // opponents: [{ name, lvl, hp, hpMax, lineupPos }] — drives the lineup visual together with players[].lineupPos
-  encounter: null,
+  encounter: {
+    title: 'Scorpion Ambush',
+    desc: 'Party engaging a swarm of Scorpions in OP12 — 2 of 4 defeated so far.',
+    opponents: [
+      { name: 'Scorpion', lvl: 3, hp: 56, hpMax: 105, lineupPos: 3 },
+      { name: 'Scorpion', lvl: 3, hp: 83, hpMax: 105, lineupPos: 4 },
+    ],
+  },
 
   // POINTS OF INTEREST (discovered locations)
   pois: [
     { location: 'D1', name: 'Market', emoji: '🏪', note: 'Buy/sell items. Must be in same quadrant to access.' },
+    { location: 'I5', name: 'Temple', emoji: '🛕', note: 'Newly discovered.' },
   ],
 
   // VEHICLE
   vehicle: {
     name: '2002 Honda Civic (Blue)',
-    location: 'D1',
+    location: 'OP12',
     upgrades: [],        // e.g. ['GPS', 'CD Player']
   },
 
@@ -263,20 +271,20 @@ const GS = {
   players: [
     {
       name: 'Marzen', class: 'Kvothe Storyteller', color: '#7F77DD',
-      hp: 125, hpMax: 125, xp: 395, level: 1,
-      location: 'OP12', vehicleSeat: null, lineupPos: null,
+      hp: 142, hpMax: 150, xp: 515, level: 2,
+      location: 'OP12', vehicleSeat: null, lineupPos: 1,
       bonusNote: 'Outer Place OP12 — no terrain bonus',
       bonusStyle: 'background:#f5f5f3;color:#6b6a66',
       equipped: [
         { cat: 'WEAPON', name: 'Spear', lvl: 1, qual: 1, stat: 'DMG 4+2' },
         { cat: 'ARMOR', name: 'Shield', lvl: 1, qual: 1, stat: 'DEF 5' },
       ],
-      sa: { name: 'Kingkiller', desc: 'Handheld weapon +25 for 1 turn', cdTotal: 5, cdLeft: 0 },
+      sa: { name: 'Kingkiller', desc: 'Handheld weapon +25 for 1 turn', cdTotal: 5, cdLeft: 3 },
     },
     {
       name: 'Rakuyo', class: 'Unsullied Warrior', color: '#1D9E75',
-      hp: 250, hpMax: 250, xp: 445, level: 2,
-      location: 'OP12', vehicleSeat: null, lineupPos: null,
+      hp: 245, hpMax: 250, xp: 565, level: 2,
+      location: 'OP12', vehicleSeat: null, lineupPos: 2,
       bonusNote: 'Outer Place OP12 — no terrain bonus',
       bonusStyle: 'background:#f5f5f3;color:#6b6a66',
       equipped: [
@@ -284,29 +292,29 @@ const GS = {
         { cat: 'WEAPON', name: 'Brass Knuckles',   lvl: 1, qual: 1, stat: 'DMG 2' },
         { cat: 'ARMOR', name: 'Shield', lvl: 2, qual: 1, stat: 'DEF 10' },
       ],
-      sa: { name: 'Unique Eunuch', desc: 'Weapon & Attack +5 for 2 turns', cdTotal: 5, cdLeft: 0 },
+      sa: { name: 'Unique Eunuch', desc: 'Weapon & Attack +5 for 2 turns', cdTotal: 5, cdLeft: 3 },
     },
     {
       name: 'Inked', class: 'Nahri Healer', color: '#D85A30',
-      hp: 60, hpMax: 60, xp: 395, level: 1,
-      location: 'OP12', vehicleSeat: null, lineupPos: null,
+      hp: 85, hpMax: 85, xp: 515, level: 2,
+      location: 'OP12', vehicleSeat: null, lineupPos: 3,
       bonusNote: 'Outer Place OP12 — no terrain bonus',
       bonusStyle: 'background:#f5f5f3;color:#6b6a66',
       equipped: [
         { cat: 'ARMOR', name: 'Boots',     lvl: 1, qual: 1, stat: 'DEF 2' },
         { cat: 'SPELL', name: 'Fireball',  lvl: 1, qual: 1, stat: 'DMG 5' },
-        { cat: 'SPELL', name: 'Lightning', lvl: 1, qual: 1, stat: 'DMG 7', note: 'Not currently active (in reserve)' },
+        { cat: 'SPELL', name: 'Lightning', lvl: 1, qual: 1, stat: 'DMG 7', note: 'Active — 2 turn item cooldown' },
       ],
-      sa: { name: 'Waterproof Bandaid', desc: 'Heal party to full HP — except players on Island terrain healed to half. Not usable in combat.', cdTotal: 8, cdLeft: 2 },
+      sa: { name: 'Waterproof Bandaid', desc: 'Heal party to full HP — except players on Island terrain healed to half. Not usable in combat.', cdTotal: 8, cdLeft: 0 },
     },
     {
       name: 'CannonFodder', class: 'Hobbit Adventurer', color: '#BA7517',
-      hp: 150, hpMax: 150, xp: 395, level: 1,
-      location: 'OP12', vehicleSeat: null, lineupPos: null,
+      hp: 175, hpMax: 175, xp: 515, level: 2,
+      location: 'OP12', vehicleSeat: null, lineupPos: 4,
       bonusNote: 'Outer Place OP12 — no terrain bonus',
       bonusStyle: 'background:#f5f5f3;color:#6b6a66',
       equipped: [
-        { cat: 'SPELL',  name: 'Fear', lvl: 1, qual: 1, stat: '—', note: 'Prevents flood damage (33% per level)' },
+        { cat: 'SPELL',  name: 'Fear', lvl: 1, qual: 1, stat: '—', note: 'Prevents flood damage (33% per level) — 2 turn item cooldown' },
         { cat: 'WEAPON', name: 'Bow',  lvl: 2, qual: 1, stat: '—', note: 'Requires arrows/bolts' },
         { cat: 'GEAR', name: 'Arrows', lvl: 2, qual: 15, stat: '—', note: 'Ammunition for Bow' },
       ],
@@ -319,6 +327,13 @@ const GS = {
   teamInventory: [
     { cat: 'WEAPON', name: 'Halberd',  lvl: 1, qual: 1, stat: 'DMG 4', note: '' },
     { cat: 'WEAPON', name: 'Crossbow', lvl: 2, qual: 1, stat: '—',     note: '' },
+    { cat: 'ARMOR', name: 'Boots', lvl: 2, qual: 1, stat: '—', note: '' },
+    { cat: 'GEAR', name: 'Bomb', lvl: 2, qual: 1, stat: '?', note: 'Does not damage players or creatures' },
+    { cat: 'SPELL', name: 'Lightning', lvl: 1, qual: 1, stat: 'DMG 7', note: 'Spare — unclaimed' },
+    { cat: 'WEAPON', name: 'Axe-Double Bladed', lvl: 3, qual: 1, stat: 'DMG 20', note: '' },
+    { cat: 'ARMOR', name: 'Shield', lvl: 2, qual: 1, stat: 'DEF 10', note: '' },
+    { cat: 'SPELL', name: 'Snow', lvl: 2, qual: 1, stat: '%', note: 'Area damage — opponents halved, team -20%' },
+    { cat: 'GEAR', name: 'Teddy Bear Plushie', lvl: 1, qual: 1, stat: '—', note: 'Trophy item' },
   ],
 
   // BESTIARY
