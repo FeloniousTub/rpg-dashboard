@@ -40,8 +40,6 @@
   .mc{aspect-ratio:1;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;}
   .td{background:#faeeda;color:#854f0b;}.tp{background:#eaf3de;color:#3b6d11;}.ti{background:#e6f1fb;color:#185fa5;}
   .ts{background:#eeedfe;color:#3c3489;}.tm{background:#d3d1c7;color:#444441;}.top{background:var(--bg-secondary);color:var(--text-tertiary);border:0.5px solid var(--border-light);}
-  .cur-main{outline:2px solid #e24b4a;outline-offset:-1px;font-weight:700;}
-  .cur-solo{outline:2px solid #BA7517;outline-offset:-1px;font-weight:700;}
   .mleg{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
   .mleg-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-secondary);}
   .mleg-dot{width:12px;height:12px;border-radius:2px;}
@@ -128,6 +126,7 @@
 <div id="party" class="section active"></div>
 <div id="status" class="section"></div>
 <div id="mapTab" class="section">
+  <div class="mleg" id="map-player-key" style="margin-bottom:8px"></div>
   <p id="map-player-legend" style="font-size:13px;color:var(--text-secondary);margin-bottom:8px"></p>
   <div class="mapgrid" id="mapgrid"></div>
   <div class="mleg">
@@ -137,8 +136,6 @@
     <div class="mleg-item"><div class="mleg-dot" style="background:#eeedfe"></div>Swamp (S)</div>
     <div class="mleg-item"><div class="mleg-dot" style="background:#d3d1c7"></div>Mountain (M)</div>
     <div class="mleg-item"><div class="mleg-dot" style="background:#f0eeea;border:.5px solid #ccc"></div>Outer Place (OP)</div>
-    <div class="mleg-item"><div class="mleg-dot" style="outline:2px solid #e24b4a;"></div>Party riding in vehicle</div>
-    <div class="mleg-item"><div class="mleg-dot" style="outline:2px solid #BA7517;"></div>Player(s) on foot</div>
     <div class="mleg-item"><span style="font-size:12px">🚗</span> Vehicle parked here</div>
     <div class="mleg-item"><span style="font-size:12px">🏪</span> Market</div>
     <div class="mleg-item"><span style="font-size:12px">⚰️</span> Crypt</div>
@@ -732,11 +729,12 @@ function renderStatus() {
 }
 
 function renderMap() {
-  const cellGroups = {};
+  // Each player gets their own colour. A square occupied by several players
+  // draws concentric rings — one per occupant, in player order.
+  const occupants = {};
   GS.players.forEach(p => {
-    const hasVeh = GS.players.some(q => q.location === p.location && q.vehicleSeat);
-    if (hasVeh && p.vehicleSeat) cellGroups[p.location] = 'main';
-    else if (!cellGroups[p.location]) cellGroups[p.location] = 'solo';
+    if (!occupants[p.location]) occupants[p.location] = [];
+    occupants[p.location].push(p);
   });
   const poiMap = {};
   GS.pois.forEach(p => { poiMap[p.location] = p; });
@@ -744,10 +742,15 @@ function renderMap() {
   mg.innerHTML = '';
   MAP_DATA.forEach(row => row.forEach(cell => {
     const d = document.createElement('div');
-    const extra = cellGroups[cell] === 'main' ? ' cur-main' : cellGroups[cell] === 'solo' ? ' cur-solo' : '';
-    d.className = 'mc ' + terrainCls(cell) + extra;
+    d.className = 'mc ' + terrainCls(cell);
     d.style.flexDirection = 'column';
     d.style.gap = '1px';
+    const here = occupants[cell];
+    if (here) {
+      d.style.boxShadow = here.map((p, i) => `inset 0 0 0 ${(i + 1) * 2}px ${p.color}`).reverse().join(', ');
+      d.style.fontWeight = '700';
+      d.title = here.map(p => `${p.name}${p.vehicleSeat ? ' (in vehicle)' : ' (on foot)'}`).join(' · ');
+    }
     if (poiMap[cell] || cell === GS.vehicle.location) {
       const iconRow = document.createElement('span');
       iconRow.style.display = 'flex';
@@ -780,12 +783,15 @@ function renderMap() {
     : '';
   document.getElementById('map-poi-list').innerHTML = poiListHtml;
 
-  const groups = {};
-  GS.players.forEach(p => { if (!groups[p.location]) groups[p.location] = []; groups[p.location].push(p.name); });
-  const legendHtml = Object.entries(groups).map(([loc, names]) => {
-    const hasVeh = GS.players.some(p => p.location === loc && p.vehicleSeat);
-    const oc = hasVeh ? '#e24b4a' : '#BA7517';
-    return `<span style="outline:2px solid ${oc};padding:1px 5px;border-radius:3px;font-weight:700">${loc}</span> ${names.join(' + ')}`;
+  // Player colour key — one swatch per player, matching their square outline
+  document.getElementById('map-player-key').innerHTML = GS.players.map(p =>
+    `<div class="mleg-item"><div class="mleg-dot" style="box-shadow:inset 0 0 0 2px ${p.color}"></div><span style="color:${p.color};font-weight:500">${p.name}</span> <span style="color:var(--text-tertiary)">${p.location}</span></div>`
+  ).join('');
+
+  const legendHtml = Object.entries(occupants).map(([loc, ps]) => {
+    const ring = ps.map((p, i) => `inset 0 0 0 ${(i + 1) * 2}px ${p.color}`).reverse().join(', ');
+    const names = ps.map(p => `<span style="color:${p.color};font-weight:500">${p.name}</span>`).join(' + ');
+    return `<span style="box-shadow:${ring};padding:2px 6px;border-radius:3px;font-weight:700">${loc}</span> ${names}`;
   }).join(' &nbsp; ');
   document.getElementById('map-player-legend').innerHTML = legendHtml;
 }
