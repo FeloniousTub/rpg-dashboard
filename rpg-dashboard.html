@@ -523,6 +523,119 @@ const GS = {
       ],
       strong: 'Fire <b>(-25 damage)</b>', weak: null,
     },
+    {
+      emoji: '🦅', name: 'Hippogriff', boss: false,
+      desc: 'Half hippo, half griffin. This winged nuisance should be without a head. He will buck you with his beak.',
+      terrain: 'Outer Place', mob: '1-2',
+      stats: { ATK:[6,12,18,24,30], STR:[7,14,21,28,35], DEF:[8,16,24,32,40], HP:[95,190,285,380,475] },
+      abilities: [
+        { label:'WEAPON', desc:'Uses a weapon attack', danger:false },
+        { label:'DEBUFF', desc:'Applies a debuff on hit', danger:true },
+      ],
+      strong: null, weak: null,
+    },
+    {
+      emoji: '🦁', name: 'Lion', boss: false,
+      desc: 'Found next to the witch inside the wardrobe. Will sing Hakuna Matata for a fee.',
+      terrain: 'Plains', mob: '2-4',
+      stats: { ATK:[7,14,21,28,35], STR:[3,6,9,12,15], DEF:[5,10,15,20,25], HP:[70,140,210,280,350] },
+      abilities: [
+        { label:'WEAPON', desc:'Uses a weapon attack', danger:false },
+        { label:'DEBUFF', desc:'Applies a debuff on hit', danger:true },
+      ],
+      strong: null, weak: 'Knife, Spear <b>(−5 damage)</b>',
+    },
+    {
+      emoji: '🐊', name: 'Alligator', boss: false,
+      desc: 'Long and scaly, mouth bites harder than a whiskey sour. If he is rolling, you are dying.',
+      terrain: 'Swamp', mob: '2-4',
+      stats: { ATK:[7,14,21,28,35], STR:[9,18,27,36,45], DEF:[7,14,21,28,35], HP:[110,220,330,440,550] },
+      abilities: [
+        { label:'WEAPON', desc:'Uses a weapon attack', danger:false },
+        { label:'DEBUFF', desc:'Applies a debuff on hit', danger:true },
+      ],
+      strong: 'Fire <b>(−4 damage)</b>', weak: null,
+    },
+    {
+      emoji: '🦊', name: 'Coyote', boss: false,
+      desc: 'Like a chihuahua but less feral. Coyotes are scavengers, often found outside soup kitchens.',
+      terrain: 'Plains', mob: '2-4',
+      stats: { ATK:[4,8,12,16,20], STR:[3,6,9,12,15], DEF:[4,8,12,16,20], HP:[60,120,180,240,300] },
+      abilities: [
+        { label:'WEAPON', desc:'Uses a weapon attack', danger:false },
+        { label:'DEBUFF', desc:'Applies a debuff on hit', danger:true },
+      ],
+      strong: null, weak: 'Halberd <b>(+5 damage)</b>',
+    },
+    {
+      emoji: '🐀', name: 'Muskrat', boss: false,
+      desc: 'Famed in songs like Muskrat Love and Muskrat Candlelight. This furry guy will burrow into your heart… through your eyes.',
+      terrain: 'Swamp', mob: '3-5',
+      stats: { ATK:[3,6,9,12,15], STR:[3,6,9,12,15], DEF:[4,8,12,16,20], HP:[40,80,120,160,200] },
+      abilities: [
+        { label:'WEAPON', desc:'Uses a weapon attack', danger:false },
+        { label:'DEBUFF', desc:'Applies a debuff on hit', danger:true },
+      ],
+      strong: null, weak: null,
+    },
+    {
+      emoji: '🐃', name: 'Yak', boss: false,
+      desc: 'Yakety yak, don\'t talk back. Yeah, these sure footed minions from hell hate that song too.',
+      terrain: 'Mountain', mob: '3-4',
+      stats: { ATK:[4,8,12,16,20], STR:[6,12,18,24,30], DEF:[8,16,24,32,40], HP:[65,130,195,260,325] },
+      abilities: [
+        { label:'WEAPON', desc:'Uses a weapon attack', danger:false },
+        { label:'DEBUFF', desc:'Applies a debuff on hit', danger:true },
+      ],
+      strong: 'Brass Knuckles <b>(−7 damage)</b>', weak: null,
+    },
+    {
+      emoji: '🦌', name: 'Elk', boss: false,
+      desc: 'Small head, oversized body, huge horns. If they get a tailwind, you should move a few steps to your left.',
+      terrain: 'Plains', mob: '2-5',
+      stats: { ATK:[5,10,15,20,25], STR:[7,14,21,28,35], DEF:[9,18,27,36,45], HP:[85,170,255,340,425] },
+      abilities: [
+        { label:'WEAPON', desc:'Uses a weapon attack', danger:false },
+        { label:'DEBUFF', desc:'Applies a debuff on hit', danger:true },
+      ],
+      strong: null, weak: 'Arrows / Bolts <b>(+5 damage)</b>',
+    },
+    {
+      emoji: '🌿', name: 'Creeper', boss: false,
+      desc: 'Overgrown green genitalia. Caution, will explode if he doesn\'t get his way. And his way is to explode.',
+      terrain: 'Outer Place', mob: '2-3',
+      stats: { ATK:[75,100,125,150,200], STR:[0,0,0,0,0], DEF:[10,20,30,40,50], HP:[100,200,300,400,500] },
+      abilities: [
+        { label:'WEAPON — EXPLOSION', desc:'ATK values are explosion damage: <b>2 turns + creature level</b>', danger:true },
+        { label:'DEBUFF', desc:'Applies a debuff on hit', danger:true },
+        { label:'NO STRENGTH', desc:'STR is <b>0</b> at every level — all its damage comes from the explosion', danger:false },
+      ],
+      strong: null, weak: 'Arrows / Bolts <b>(+5 damage)</b>',
+    },
+    {
+      emoji: '🦍', name: 'Sasquatch', boss: true,
+      desc: 'Known as Yeti, Bushman, or Bigfoot. He likes to be called Dave. Tall and covered in hair, he looks a little like my Aunt June.',
+      terrain: 'Mountain', mob: '1',
+      stats: { ATK:[null,null,null,null,40], STR:[null,null,null,null,75], DEF:[null,null,null,null,50], HP:[null,null,null,null,850] },
+      abilities: [
+        { label:'WEAPON — DOUBLE AXE', desc:'Attacks with a double-bladed axe', danger:true },
+        { label:'DEBUFF', desc:'Applies a debuff on hit', danger:true },
+        { label:'OUTNUMBER', desc:'Attack <b>+15</b> if fewer than <b>3 players</b> are facing him', danger:true },
+      ],
+      strong: null, weak: 'Fireball <b>(+3 damage)</b>',
+    },
+    {
+      emoji: '🦬', name: 'Tatanka', boss: true,
+      desc: 'He comes from a land down under Canada. Six foot four and full of muscles. Affinity for smashing plates and chomping vegemite.',
+      terrain: 'Plains', mob: '1',
+      stats: { ATK:[null,null,null,null,60], STR:[null,null,null,null,60], DEF:[null,null,null,null,60], HP:[null,null,null,null,1100] },
+      abilities: [
+        { label:'WEAPON — CHARGE HORNS', desc:'Charges with his horns', danger:true },
+        { label:'DEBUFF', desc:'Applies a debuff on hit', danger:true },
+        { label:'OUTNUMBER', desc:'Speed <b>+15</b> if fewer than <b>3 players</b> are facing him', danger:true },
+      ],
+      strong: null, weak: 'Fireball <b>(+3 damage)</b>',
+    },
   ],
 };
 // =============================================================
@@ -929,7 +1042,7 @@ function renderRoaming() {
   const bossCount = roam.filter(r => r.boss).length;
   el.innerHTML =
     `<div class="stitle">Creatures roaming</div>
-     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">${roam.length} sighted · <span style="color:#a32d2d;font-weight:500">${bossCount} boss${bossCount !== 1 ? 'es' : ''}</span>. 🐾 marks a creature on the map · 💀 marks a boss. <b>Click a column heading to sort</b></p>
+     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">${roam.length} sighted · <span style="color:#a32d2d;font-weight:500">${bossCount} boss${bossCount !== 1 ? 'es' : ''}</span>. 🐾 marks a creature on the map · 💀 marks a boss.</p>
      <table class="roam-tbl"><thead><tr>${heads}</tr></thead><tbody>${rows}</tbody></table>`;
 }
 
