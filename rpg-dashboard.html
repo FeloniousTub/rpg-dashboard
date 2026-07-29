@@ -37,7 +37,14 @@
   .bdg{display:inline-block;font-size:10px;padding:1px 6px;border-radius:99px;font-weight:500;}
   .bsp{background:#eeedfe;color:#3c3489;}.bwp{background:#faece7;color:#993c1d;}.bap{background:#eaf3de;color:#3b6d11;}
   .mapgrid{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;margin-top:.5rem;}
-  .mc{aspect-ratio:1;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;}
+  .mc{aspect-ratio:1;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:4px;font-size:12px;font-weight:600;overflow:hidden;}
+  .mc-label{letter-spacing:.02em;}
+  .mc-poi{display:flex;gap:3px;font-size:16px;line-height:1;}
+  .mc-players{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;}
+  .mc-pdot{width:11px;height:11px;border-radius:50%;border:1.5px solid rgba(255,255,255,.9);}
+  .mc-mob{display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.9);border:1px solid rgba(0,0,0,.15);border-radius:99px;padding:1px 7px;font-size:13px;font-weight:700;line-height:1.5;color:var(--text-primary);}
+  .mc-mob.has-boss{background:#fcebeb;border-color:#d98a8a;color:#a32d2d;}
+  .mc-mob .mob-n{font-size:11px;}
   .td{background:#faeeda;color:#854f0b;}.tp{background:#eaf3de;color:#3b6d11;}.ti{background:#e6f1fb;color:#185fa5;}
   .ts{background:#eeedfe;color:#3c3489;}.tm{background:#d3d1c7;color:#444441;}.top{background:var(--bg-secondary);color:var(--text-tertiary);border:0.5px solid var(--border-light);}
   .mc.dead{background:repeating-linear-gradient(45deg,#c22b2b 0,#c22b2b 5px,#a32020 5px,#a32020 10px);color:rgba(255,255,255,.85);border:none;text-decoration:line-through;}
@@ -45,6 +52,11 @@
   .mc-mob .boss-dot{color:#a32d2d;}
   .roam-tbl{width:100%;font-size:12px;border-collapse:collapse;}
   .roam-tbl th{text-align:left;padding:6px 8px;font-weight:500;color:var(--text-secondary);font-size:11px;border-bottom:.5px solid var(--border-med);}
+  .roam-tbl th.sortable{cursor:pointer;user-select:none;white-space:nowrap;}
+  .roam-tbl th.sortable:hover{color:var(--text-primary);}
+  .roam-tbl th.sorted{color:var(--text-primary);font-weight:600;}
+  .sort-arrow{font-size:9px;margin-left:4px;opacity:.35;}
+  .roam-tbl th.sorted .sort-arrow{opacity:1;}
   .roam-tbl td{padding:5px 8px;border-bottom:.5px solid var(--border-light);}
   .roam-tbl tr:last-child td{border-bottom:none;}
   .roam-tbl tr.is-boss td{background:#fcebeb;}
@@ -149,7 +161,9 @@
     <div class="mleg-item"><span style="font-size:12px">🏪</span> Market</div>
     <div class="mleg-item"><span style="font-size:12px">🛕</span> Temple</div>
     <div class="mleg-item"><div class="mleg-dot" style="background:repeating-linear-gradient(45deg,#c22b2b 0,#c22b2b 3px,#a32020 3px,#a32020 6px)"></div>Destroyed — impassable</div>
-    <div class="mleg-item"><span style="font-size:12px">🐾</span> Creature roaming here</div>
+    <div class="mleg-item"><span class="mc-mob">🐾<span class="mob-n">×2</span></span> Creatures roaming (count)</div>
+    <div class="mleg-item"><span class="mc-mob has-boss">💀</span> Boss here</div>
+    <div class="mleg-item"><span class="mc-pdot" style="background:#6b6a66;display:inline-block"></span> One dot per player on the square</div>
   </div>
   <div id="map-poi-list" style="margin-top:10px"></div>
   <div id="map-roaming-list" style="margin-top:10px"></div>
@@ -793,54 +807,44 @@ function renderMap() {
   MAP_DATA.forEach(row => row.forEach(cell => {
     const d = document.createElement('div');
     d.className = 'mc ' + terrainCls(cell) + (dead.has(cell) ? ' dead' : '');
-    d.style.flexDirection = 'column';
-    d.style.gap = '1px';
     if (dead.has(cell)) {
       d.title = `${cell} — DESTROYED. This quadrant no longer exists.`;
-      const lbl = document.createElement('span');
-      lbl.textContent = cell;
-      d.appendChild(lbl);
+      d.innerHTML = `<span class="mc-label">${cell}</span>`;
       mg.appendChild(d);
       return;
     }
+
+    // Row 1 — POI / vehicle icons
+    const icons = [];
+    if (poiMap[cell]) icons.push(`<span title="${poiMap[cell].name}">${poiMap[cell].emoji}</span>`);
+    if (cell === GS.vehicle.location) icons.push(`<span title="${GS.vehicle.name} — parked here">🚗</span>`);
+    let inner = icons.length ? `<span class="mc-poi">${icons.join('')}</span>` : '';
+
+    // Row 2 — quadrant label (always legible: a single thin ring, never stacked rings)
+    inner += `<span class="mc-label">${cell}</span>`;
+
+    // Row 3 — one coloured dot per player standing here
     const here = occupants[cell];
     if (here) {
-      d.style.boxShadow = here.map((p, i) => `inset 0 0 0 ${(i + 1) * 2}px ${p.color}`).reverse().join(', ');
-      d.style.fontWeight = '700';
+      inner += `<span class="mc-players">${here.map(p =>
+        `<span class="mc-pdot" style="background:${p.color}" title="${p.name}"></span>`).join('')}</span>`;
+      d.style.boxShadow = here.length === 1
+        ? `inset 0 0 0 2px ${here[0].color}`
+        : 'inset 0 0 0 2px rgba(0,0,0,0.45)';
       d.title = here.map(p => `${p.name}${p.vehicleSeat ? ' (in vehicle)' : ' (on foot)'}`).join(' · ');
     }
-    if (poiMap[cell] || cell === GS.vehicle.location) {
-      const iconRow = document.createElement('span');
-      iconRow.style.display = 'flex';
-      iconRow.style.gap = '2px';
-      if (poiMap[cell]) {
-        const icon = document.createElement('span');
-        icon.style.fontSize = '12px';
-        icon.title = poiMap[cell].name;
-        icon.textContent = poiMap[cell].emoji;
-        iconRow.appendChild(icon);
-      }
-      if (cell === GS.vehicle.location) {
-        const veh = document.createElement('span');
-        veh.style.fontSize = '12px';
-        veh.title = `${GS.vehicle.name} — parked here`;
-        veh.textContent = '🚗';
-        iconRow.appendChild(veh);
-      }
-      d.appendChild(iconRow);
-    }
-    const lbl = document.createElement('span');
-    lbl.textContent = cell;
-    d.appendChild(lbl);
+
+    // Row 4 — single creature badge with a count, red when a boss is present
     if (mobs[cell]) {
-      const mob = document.createElement('span');
-      mob.className = 'mc-mob';
-      const hasBoss = mobs[cell].some(m => m.boss);
-      mob.innerHTML = mobs[cell].map(m => m.boss ? '<span class="boss-dot">💀</span>' : '🐾').join('');
-      mob.title = mobs[cell].map(m => `${m.name} L${m.lvl} · ${m.hp} HP${m.boss ? ' (BOSS)' : ''}`).join(' · ');
-      if (hasBoss) d.style.outline = '2px solid #a32d2d';
-      d.appendChild(mob);
+      const list = mobs[cell];
+      const hasBoss = list.some(m => m.boss);
+      const n = list.length;
+      inner += `<span class="mc-mob${hasBoss ? ' has-boss' : ''}" title="${
+        list.map(m => `${m.name} L${m.lvl} · ${m.hp} HP${m.boss ? ' (BOSS)' : ''}`).join(' · ')
+      }">${hasBoss ? '💀' : '🐾'}${n > 1 ? `<span class="mob-n">×${n}</span>` : ''}</span>`;
     }
+
+    d.innerHTML = inner;
     mg.appendChild(d);
   }));
   const poiListHtml = GS.pois.length
@@ -850,25 +854,7 @@ function renderMap() {
     : '';
   document.getElementById('map-poi-list').innerHTML = poiListHtml;
 
-  // Roaming creature roster
-  const roam = GS.roaming || [];
-  if (roam.length) {
-    const bossCount = roam.filter(r => r.boss).length;
-    const rows = roam.map(r =>
-      `<tr class="${r.boss ? 'is-boss' : ''}">
-         <td style="white-space:nowrap"><span style="font-size:14px;margin-right:5px">${r.emoji}</span><b>${r.name}</b>${r.boss ? '<span class="boss-badge">BOSS</span>' : ''}</td>
-         <td>LVL ${r.lvl}</td>
-         <td><span class="quad-pill">${r.quad}</span></td>
-         <td style="text-align:right">${r.hp.toLocaleString()} HP</td>
-       </tr>`
-    ).join('');
-    document.getElementById('map-roaming-list').innerHTML =
-      `<div class="stitle">Creatures roaming</div>
-       <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">${roam.length} sighted · <span style="color:#a32d2d;font-weight:500">${bossCount} boss${bossCount!==1?'es':''}</span>. 🐾 marks a creature on the map · 💀 marks a boss.</p>
-       <table class="roam-tbl"><thead><tr><th>Creature</th><th>Level</th><th>Quadrant</th><th style="text-align:right">HP</th></tr></thead><tbody>${rows}</tbody></table>`;
-  } else {
-    document.getElementById('map-roaming-list').innerHTML = '';
-  }
+  renderRoaming();
 
   // Player colour key — one swatch per player, matching their square outline
   document.getElementById('map-player-key').innerHTML = GS.players.map(p =>
@@ -876,11 +862,75 @@ function renderMap() {
   ).join('');
 
   const legendHtml = Object.entries(occupants).map(([loc, ps]) => {
-    const ring = ps.map((p, i) => `inset 0 0 0 ${(i + 1) * 2}px ${p.color}`).reverse().join(', ');
+    const ring = ps.length === 1 ? `inset 0 0 0 2px ${ps[0].color}` : 'inset 0 0 0 2px rgba(0,0,0,0.45)';
+    const dots = ps.map(p => `<span class="mc-pdot" style="background:${p.color};display:inline-block;vertical-align:-1px"></span>`).join(' ');
     const names = ps.map(p => `<span style="color:${p.color};font-weight:500">${p.name}</span>`).join(' + ');
-    return `<span style="box-shadow:${ring};padding:2px 6px;border-radius:3px;font-weight:700">${loc}</span> ${names}`;
+    return `<span style="box-shadow:${ring};padding:2px 7px;border-radius:4px;font-weight:700">${loc}</span> ${dots} ${names}`;
   }).join(' &nbsp; ');
   document.getElementById('map-player-legend').innerHTML = legendHtml;
+}
+
+// --- ROAMING CREATURE ROSTER (sortable) ---
+// Click any column header to sort; click the same header again to reverse it.
+let roamSort = { key: 'name', dir: 1 };
+
+// 'OP24' -> ['OP', 24] so quadrants group by terrain then run numerically (D1..D9, then I, M, OP, P, S)
+function quadParts(q) {
+  const m = /^([A-Z]+)(\d+)$/.exec(q);
+  return m ? [m[1], parseInt(m[2], 10)] : [q, 0];
+}
+
+function sortRoaming(key) {
+  if (roamSort.key === key) roamSort.dir = -roamSort.dir;
+  else roamSort = { key, dir: 1 };
+  renderRoaming();
+}
+
+function renderRoaming() {
+  const el = document.getElementById('map-roaming-list');
+  const roam = (GS.roaming || []).slice();
+  if (!roam.length) { el.innerHTML = ''; return; }
+
+  const cmp = {
+    name: (a, b) => a.name.localeCompare(b.name),
+    lvl:  (a, b) => a.lvl - b.lvl,
+    hp:   (a, b) => a.hp - b.hp,
+    quad: (a, b) => {
+      const [at, an] = quadParts(a.quad), [bt, bn] = quadParts(b.quad);
+      return at === bt ? an - bn : at.localeCompare(bt);
+    },
+  }[roamSort.key];
+  // Stable tiebreak so equal rows never jump around between sorts
+  roam.sort((a, b) => cmp(a, b) * roamSort.dir
+    || a.name.localeCompare(b.name)
+    || quadParts(a.quad)[1] - quadParts(b.quad)[1]);
+
+  const cols = [
+    { key:'name', label:'Creature', align:'left'  },
+    { key:'lvl',  label:'Level',    align:'left'  },
+    { key:'quad', label:'Quadrant', align:'left'  },
+    { key:'hp',   label:'HP',       align:'right' },
+  ];
+  const heads = cols.map(c => {
+    const on = roamSort.key === c.key;
+    const arrow = on ? (roamSort.dir === 1 ? '▲' : '▼') : '▲';
+    return `<th class="sortable${on ? ' sorted' : ''}" style="text-align:${c.align}" onclick="sortRoaming('${c.key}')" title="Sort by ${c.label.toLowerCase()}">${c.label}<span class="sort-arrow">${arrow}</span></th>`;
+  }).join('');
+
+  const rows = roam.map(r =>
+    `<tr class="${r.boss ? 'is-boss' : ''}">
+       <td style="white-space:nowrap"><span style="font-size:14px;margin-right:5px">${r.emoji}</span><b>${r.name}</b>${r.boss ? '<span class="boss-badge">BOSS</span>' : ''}</td>
+       <td>LVL ${r.lvl}</td>
+       <td><span class="quad-pill">${r.quad}</span></td>
+       <td style="text-align:right">${r.hp.toLocaleString()} HP</td>
+     </tr>`
+  ).join('');
+
+  const bossCount = roam.filter(r => r.boss).length;
+  el.innerHTML =
+    `<div class="stitle">Creatures roaming</div>
+     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">${roam.length} sighted · <span style="color:#a32d2d;font-weight:500">${bossCount} boss${bossCount !== 1 ? 'es' : ''}</span>. 🐾 marks a creature on the map · 💀 marks a boss. <b>Click a column heading to sort</b> — click again to reverse.</p>
+     <table class="roam-tbl"><thead><tr>${heads}</tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 function renderBestiary() {
