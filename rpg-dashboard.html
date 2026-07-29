@@ -929,7 +929,7 @@ function renderRoaming() {
   const bossCount = roam.filter(r => r.boss).length;
   el.innerHTML =
     `<div class="stitle">Creatures roaming</div>
-     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">${roam.length} sighted · <span style="color:#a32d2d;font-weight:500">${bossCount} boss${bossCount !== 1 ? 'es' : ''}</span>. 🐾 marks a creature on the map · 💀 marks a boss. <b>Click a column heading to sort</b> — click again to reverse.</p>
+     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">${roam.length} sighted · <span style="color:#a32d2d;font-weight:500">${bossCount} boss${bossCount !== 1 ? 'es' : ''}</span>. 🐾 marks a creature on the map · 💀 marks a boss. <b>Click a column heading to sort</b></p>
      <table class="roam-tbl"><thead><tr>${heads}</tr></thead><tbody>${rows}</tbody></table>`;
 }
 
