@@ -40,6 +40,15 @@
   .mc{aspect-ratio:1;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;}
   .td{background:#faeeda;color:#854f0b;}.tp{background:#eaf3de;color:#3b6d11;}.ti{background:#e6f1fb;color:#185fa5;}
   .ts{background:#eeedfe;color:#3c3489;}.tm{background:#d3d1c7;color:#444441;}.top{background:var(--bg-secondary);color:var(--text-tertiary);border:0.5px solid var(--border-light);}
+  .mc.dead{background:repeating-linear-gradient(45deg,#c22b2b 0,#c22b2b 5px,#a32020 5px,#a32020 10px);color:rgba(255,255,255,.85);border:none;text-decoration:line-through;}
+  .mc-mob{font-size:10px;line-height:1;}
+  .mc-mob .boss-dot{color:#a32d2d;}
+  .roam-tbl{width:100%;font-size:12px;border-collapse:collapse;}
+  .roam-tbl th{text-align:left;padding:6px 8px;font-weight:500;color:var(--text-secondary);font-size:11px;border-bottom:.5px solid var(--border-med);}
+  .roam-tbl td{padding:5px 8px;border-bottom:.5px solid var(--border-light);}
+  .roam-tbl tr:last-child td{border-bottom:none;}
+  .roam-tbl tr.is-boss td{background:#fcebeb;}
+  .quad-pill{display:inline-block;background:var(--bg-secondary);border-radius:4px;padding:1px 6px;font-size:11px;font-weight:600;}
   .mleg{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
   .mleg-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-secondary);}
   .mleg-dot{width:12px;height:12px;border-radius:2px;}
@@ -138,10 +147,12 @@
     <div class="mleg-item"><div class="mleg-dot" style="background:#f0eeea;border:.5px solid #ccc"></div>Outer Place (OP)</div>
     <div class="mleg-item"><span style="font-size:12px">🚗</span> Vehicle parked here</div>
     <div class="mleg-item"><span style="font-size:12px">🏪</span> Market</div>
-    <div class="mleg-item"><span style="font-size:12px">⚰️</span> Crypt</div>
-    <div class="mleg-item"><span style="font-size:12px">⛪</span> Monastery</div>
+    <div class="mleg-item"><span style="font-size:12px">🛕</span> Temple</div>
+    <div class="mleg-item"><div class="mleg-dot" style="background:repeating-linear-gradient(45deg,#c22b2b 0,#c22b2b 3px,#a32020 3px,#a32020 6px)"></div>Destroyed — impassable</div>
+    <div class="mleg-item"><span style="font-size:12px">🐾</span> Creature roaming here</div>
   </div>
   <div id="map-poi-list" style="margin-top:10px"></div>
+  <div id="map-roaming-list" style="margin-top:10px"></div>
   <p class="hint" style="margin-top:10px">Mob spawn: 35% in terrain | 50% in OP. All players who hit a creature share the loot.</p>
 </div>
 <div id="classes" class="section">
@@ -184,6 +195,8 @@
     <div class="rc"><div class="rtitle">Creature spawning</div><div class="rbody">Mob spawn: <b>35%</b> main terrain | <b>50%</b> OP. No new mobs spawn mid-battle, but wanderers from unfinished battles can arrive.</div></div>
     <div class="rc"><div class="rtitle">Player death</div><div class="rbody">Dead players still plan with team. Final blow earns <b>1 item of choice + 250 XP x enemy level</b>. All other items vanish. <b>Coins &amp; quest items cannot be looted.</b></div></div>
     <div class="rc"><div class="rtitle">Team leader</div><div class="rbody">Communicates moves to admin. Provides a stat boost nearby. On death: <b>no new leader</b> - dead leader still manages admin comms.</div></div>
+    <div class="rc" style="border:1px solid #b9b3f0;background:#f7f6ff"><div class="rtitle">Summoned &amp; animated creatures <span class="bdg bsp" style="margin-left:6px">NEW RULE</span></div><div class="rbody">A creature raised by <b>Animate</b> or <b>Summon</b> <b>belongs to the team</b>. It can be <b>assigned to travel with a player</b>. If that player is a <b>Hobbit Adventurer</b>, the <b>My Precious</b> invisibility effect <b>also transfers to the creature</b>.</div></div>
+    <div class="rc" style="border:1px solid #f0b8b8;background:#fcebeb"><div class="rtitle">Destroyed quadrants</div><div class="rbody">The entire bottom row of the map has been <b>destroyed</b>: <b>S7 S8 S9 · OP34 OP35 OP36 · M7 M8 M9</b>. These squares no longer exist and cannot be entered.</div></div>
   </div>
 </div>
 <div id="market" class="section">
@@ -232,25 +245,23 @@
 const GS = {
 
   // META
-  coins: 649,
-  quest: 'Museum Day 1/13',
+  coins: 1902,
+  // quests: one entry per open quest — { name, progress }
+  quests: [
+    { name: 'Museum Day',           progress: '2 / 13 tasks completed' },
+    { name: 'Trouble With Tribbles', progress: '7 / 50 tasks completed' },
+  ],
   // encounter: set to { title, desc, opponents } when active, else null
   // opponents: [{ name, lvl, hp, hpMax, lineupPos }] — drives the lineup visual together with players[].lineupPos
-  encounter: {
-    title: 'Four Separate Duels',
-    desc: 'Scorpion ambush cleared — all Scorpions defeated. Party has scattered and each member is now in a solo 1-v-1 fight: Inked vs Grey Wolf (OP18) · Marzen vs Piranha (OP19) · CannonFodder vs Chamois (M5) · Rakuyo vs Doom Slug (D3). Each pair below is its own battle, not a shared lineup.',
-    opponents: [
-      { name: 'Grey Wolf', lvl: 2, hp: 165, hpMax: 165, lineupPos: 1 },
-      { name: 'Piranha',   lvl: 2, hp: 160, hpMax: 160, lineupPos: 2 },
-      { name: 'Chamois',   lvl: 2, hp: 90,  hpMax: 90,  lineupPos: 3 },
-      { name: 'Doom Slug', lvl: 2, hp: 180, hpMax: 180, lineupPos: 4 },
-    ],
-  },
+  encounter: null,
+
+  // DESTROYED QUADRANTS — squares wiped off the map, impassable
+  destroyed: ['S7','S8','S9','OP34','OP35','OP36','M7','M8','M9'],
 
   // POINTS OF INTEREST (discovered locations)
   pois: [
     { location: 'D1', name: 'Market', emoji: '🏪', note: 'Buy/sell items. Must be in same quadrant to access.' },
-    { location: 'I5', name: 'Temple', emoji: '🛕', note: 'Newly discovered.' },
+    { location: 'I5', name: 'Temple', emoji: '🛕', note: 'Dr. Moreau (LVL 5 boss, 2500 HP) is roaming here.' },
   ],
 
   // VEHICLE
@@ -270,9 +281,9 @@ const GS = {
   players: [
     {
       name: 'Marzen', class: 'Kvothe Storyteller', color: '#7F77DD',
-      hp: 135, hpMax: 135, xp: 655, level: 2,
-      location: 'OP19', vehicleSeat: null, lineupPos: 2,
-      bonusNote: 'Alone in OP19 · +2 STR active',
+      hp: 160, hpMax: 160, xp: 1309, level: 2,
+      location: 'P7', vehicleSeat: null, lineupPos: 1,
+      bonusNote: 'Plains P7 · party regrouped — no class terrain bonus',
       bonusStyle: 'background:#eaf3de;color:#3b6d11',
       equipped: [
         { cat: 'WEAPON', name: 'Spear', lvl: 1, qual: 1, stat: 'DMG 4+2' },
@@ -282,23 +293,23 @@ const GS = {
     },
     {
       name: 'Rakuyo', class: 'Unsullied Warrior', color: '#1D9E75',
-      hp: 245, hpMax: 245, xp: 705, level: 2,
-      location: 'D3', vehicleSeat: null, lineupPos: 4,
-      bonusNote: 'Desert D3 · +2 ATK active',
-      bonusStyle: 'background:#faeeda;color:#854f0b',
+      hp: 236, hpMax: 270, xp: 1225, level: 2,
+      location: 'P7', vehicleSeat: null, lineupPos: 3,
+      bonusNote: 'Plains P7 · party regrouped — no class terrain bonus',
+      bonusStyle: 'background:#eaf3de;color:#3b6d11',
       equipped: [
         { cat: 'WEAPON', name: 'Axe-Single Blade', lvl: 1, qual: 1, stat: 'DMG 5' },
         { cat: 'WEAPON', name: 'Brass Knuckles',   lvl: 1, qual: 1, stat: 'DMG 2' },
         { cat: 'ARMOR', name: 'Shield', lvl: 2, qual: 1, stat: 'DEF 10' },
       ],
-      sa: { name: 'Unique Eunuch', desc: 'Weapon & Attack +5 for 2 turns', cdTotal: 5, cdLeft: 0 },
+      sa: { name: 'Unique Eunuch', desc: 'Weapon & Attack +5 for 2 turns', cdTotal: 5, cdLeft: 5 },
     },
     {
       name: 'Inked', class: 'Nahri Healer', color: '#D85A30',
-      hp: 70, hpMax: 70, xp: 655, level: 2,
-      location: 'OP18', vehicleSeat: null, lineupPos: 1,
-      bonusNote: 'Outer Place OP18 — no terrain bonus',
-      bonusStyle: 'background:#f5f5f3;color:#6b6a66',
+      hp: 95, hpMax: 95, xp: 1175, level: 2,
+      location: 'P7', vehicleSeat: null, lineupPos: 2,
+      bonusNote: 'Plains P7 · party regrouped — no class terrain bonus',
+      bonusStyle: 'background:#eaf3de;color:#3b6d11',
       equipped: [
         { cat: 'ARMOR', name: 'Boots',     lvl: 1, qual: 1, stat: 'DEF 2' },
         { cat: 'SPELL', name: 'Snow',      lvl: 2, qual: 1, stat: '%', note: 'Area damage — opponents halved, team -20%' },
@@ -308,10 +319,10 @@ const GS = {
     },
     {
       name: 'CannonFodder', class: 'Hobbit Adventurer', color: '#BA7517',
-      hp: 153, hpMax: 160, xp: 655, level: 2,
-      location: 'M5', vehicleSeat: null, lineupPos: 3,
-      bonusNote: 'Mountain M5 · +1 Speed active',
-      bonusStyle: 'background:#d3d1c7;color:#444441',
+      hp: 164, hpMax: 185, xp: 1175, level: 2,
+      location: 'P7', vehicleSeat: null, lineupPos: 4,
+      bonusNote: 'Plains P7 · party regrouped — no class terrain bonus',
+      bonusStyle: 'background:#eaf3de;color:#3b6d11',
       equipped: [
         { cat: 'SPELL',  name: 'Fear', lvl: 1, qual: 1, stat: '—', note: 'Prevents flood damage (33% per level) — 2 turn item cooldown' },
         { cat: 'WEAPON', name: 'Bow',  lvl: 2, qual: 1, stat: '—', note: 'Requires arrows/bolts' },
@@ -327,12 +338,42 @@ const GS = {
     { cat: 'WEAPON', name: 'Halberd',  lvl: 1, qual: 1, stat: 'DMG 4', note: '' },
     { cat: 'WEAPON', name: 'Crossbow', lvl: 2, qual: 1, stat: '—',     note: '' },
     { cat: 'ARMOR', name: 'Boots', lvl: 2, qual: 1, stat: '—', note: '' },
-    { cat: 'GEAR', name: 'Bomb', lvl: 2, qual: 1, stat: '?', note: 'Does not damage players or creatures' },
+    { cat: 'GEAR', name: 'Bomb', lvl: 2, qual: 1, stat: '?', note: 'Weapon/item — does not damage players or creatures' },
     { cat: 'SPELL', name: 'Lightning', lvl: 1, qual: 1, stat: 'DMG 7', note: 'Spare — unclaimed' },
     { cat: 'WEAPON', name: 'Axe-Double Bladed', lvl: 3, qual: 1, stat: 'DMG 20', note: '' },
     { cat: 'ARMOR', name: 'Shield', lvl: 2, qual: 1, stat: 'DEF 10', note: '' },
-    { cat: 'SPELL', name: 'Fireball', lvl: 1, qual: 1, stat: 'DMG 5', note: 'Unequipped by Inked — swapped for Snow' },
     { cat: 'GEAR', name: 'Teddy Bear Plushie', lvl: 1, qual: 1, stat: '—', note: 'Trophy item' },
+    { cat: 'SPELL', name: 'Flood', lvl: 2, qual: 1, stat: 'DMG 25', note: 'Area — floods the quadrant, team takes 20% damage' },
+    { cat: 'ARMOR', name: 'Leg Bracers', lvl: 2, qual: 1, stat: 'DEF 8', note: '' },
+    { cat: 'GEAR', name: 'Lion Plushie', lvl: 1, qual: 1, stat: '—', note: 'Trophy item' },
+    { cat: 'GEAR', name: 'Slug Slime', lvl: 2, qual: 5, stat: 'DMG 4', note: 'Weapon support — rub on crossbow bolts. 5 in stock. Cannot combine with Frost Bolts' },
+    { cat: 'SPELL', name: 'Inferno', lvl: 3, qual: 1, stat: 'DMG 20', note: 'Flaming weapon — Double Axe, Warhammer and Sword only' },
+  ],
+
+  // ROAMING CREATURES — live sightings on the map
+  // { emoji, name, lvl, quad, hp, boss }
+  roaming: [
+    { emoji: '🐊', name: 'Alligator',  lvl: 3, quad: 'M3',   hp: 330,  boss: false },
+    { emoji: '🐊', name: 'Alligator',  lvl: 1, quad: 'OP17', hp: 110,  boss: false },
+    { emoji: '👹', name: 'Bunyip',     lvl: 5, quad: 'OP23', hp: 840,  boss: true  },
+    { emoji: '🐐', name: 'Chamois',    lvl: 2, quad: 'OP9',  hp: 90,   boss: false },
+    { emoji: '🦊', name: 'Coyote',     lvl: 2, quad: 'S5',   hp: 120,  boss: false },
+    { emoji: '🦊', name: 'Coyote',     lvl: 3, quad: 'OP24', hp: 180,  boss: false },
+    { emoji: '🌿', name: 'Creeper',    lvl: 3, quad: 'OP29', hp: 300,  boss: false },
+    { emoji: '🌿', name: 'Creeper',    lvl: 5, quad: 'OP13', hp: 500,  boss: false },
+    { emoji: '🧪', name: 'Dr. Moreau', lvl: 5, quad: 'I5',   hp: 2500, boss: true  },
+    { emoji: '🦌', name: 'Elk',        lvl: 4, quad: 'P8',   hp: 340,  boss: false },
+    { emoji: '🦌', name: 'Elk',        lvl: 4, quad: 'D5',   hp: 340,  boss: false },
+    { emoji: '🐺', name: 'Grey Wolf',  lvl: 2, quad: 'I4',   hp: 165,  boss: false },
+    { emoji: '🦅', name: 'Hippogriff', lvl: 2, quad: 'D9',   hp: 190,  boss: false },
+    { emoji: '🦅', name: 'Hippogriff', lvl: 2, quad: 'D9',   hp: 190,  boss: false },
+    { emoji: '🐀', name: 'Muskrat',    lvl: 2, quad: 'OP10', hp: 80,   boss: false },
+    { emoji: '🐀', name: 'Muskrat',    lvl: 2, quad: 'D9',   hp: 80,   boss: false },
+    { emoji: '🦦', name: 'Otter',      lvl: 1, quad: 'S3',   hp: 30,   boss: false },
+    { emoji: '🦦', name: 'Otter',      lvl: 1, quad: 'S3',   hp: 30,   boss: false },
+    { emoji: '🦍', name: 'Sasquatch',  lvl: 5, quad: 'OP24', hp: 850,  boss: true  },
+    { emoji: '🐃', name: 'Yak',        lvl: 1, quad: 'I1',   hp: 65,   boss: false },
+    { emoji: '🐃', name: 'Yak',        lvl: 3, quad: 'OP2',  hp: 195,  boss: false },
   ],
 
   // BESTIARY
@@ -714,12 +755,15 @@ function renderStatus() {
   const invRows = GS.teamInventory.length
     ? GS.teamInventory.map(i => `<tr><td>${catBadge(i.cat)}</td><td>${i.name}</td><td>${i.lvl}</td><td>${i.qual}</td><td>${i.stat}</td><td style="color:var(--text-secondary);font-size:11px">${i.note}</td></tr>`).join('')
     : `<tr><td colspan="6" style="color:var(--text-secondary);padding:10px 8px">No unequipped items</td></tr>`;
+  const questPills = (GS.quests || []).map(q =>
+    `<div class="pill">Quest: <b>${q.name}</b> · ${q.progress}</div>`
+  ).join('');
   document.getElementById('status').innerHTML = `${banner()}
     <div class="stat-pills">
       <div class="pill">Coins: <b>${GS.coins.toLocaleString()}</b></div>
       <div class="pill">Vehicle: <b>${GS.vehicle.name} · ${GS.vehicle.location}</b></div>
       <div class="pill">Upgrades: <b>${upgStr}</b></div>
-      <div class="pill">Quest: <b>${GS.quest}</b></div>
+      ${questPills}
     </div>
     <div class="stitle">Player status</div>
     <table class="seat-tbl"><thead><tr><th>Player</th><th>XP</th><th>LVL</th><th>HP</th><th>SA Cooldown</th><th>Location</th><th>In Vehicle</th><th>Equipped</th></tr></thead><tbody>${playerRows}</tbody></table>
@@ -738,13 +782,27 @@ function renderMap() {
   });
   const poiMap = {};
   GS.pois.forEach(p => { poiMap[p.location] = p; });
+  const dead = new Set(GS.destroyed || []);
+  const mobs = {};
+  (GS.roaming || []).forEach(m => {
+    if (!mobs[m.quad]) mobs[m.quad] = [];
+    mobs[m.quad].push(m);
+  });
   const mg = document.getElementById('mapgrid');
   mg.innerHTML = '';
   MAP_DATA.forEach(row => row.forEach(cell => {
     const d = document.createElement('div');
-    d.className = 'mc ' + terrainCls(cell);
+    d.className = 'mc ' + terrainCls(cell) + (dead.has(cell) ? ' dead' : '');
     d.style.flexDirection = 'column';
     d.style.gap = '1px';
+    if (dead.has(cell)) {
+      d.title = `${cell} — DESTROYED. This quadrant no longer exists.`;
+      const lbl = document.createElement('span');
+      lbl.textContent = cell;
+      d.appendChild(lbl);
+      mg.appendChild(d);
+      return;
+    }
     const here = occupants[cell];
     if (here) {
       d.style.boxShadow = here.map((p, i) => `inset 0 0 0 ${(i + 1) * 2}px ${p.color}`).reverse().join(', ');
@@ -774,6 +832,15 @@ function renderMap() {
     const lbl = document.createElement('span');
     lbl.textContent = cell;
     d.appendChild(lbl);
+    if (mobs[cell]) {
+      const mob = document.createElement('span');
+      mob.className = 'mc-mob';
+      const hasBoss = mobs[cell].some(m => m.boss);
+      mob.innerHTML = mobs[cell].map(m => m.boss ? '<span class="boss-dot">💀</span>' : '🐾').join('');
+      mob.title = mobs[cell].map(m => `${m.name} L${m.lvl} · ${m.hp} HP${m.boss ? ' (BOSS)' : ''}`).join(' · ');
+      if (hasBoss) d.style.outline = '2px solid #a32d2d';
+      d.appendChild(mob);
+    }
     mg.appendChild(d);
   }));
   const poiListHtml = GS.pois.length
@@ -782,6 +849,26 @@ function renderMap() {
       ).join('')
     : '';
   document.getElementById('map-poi-list').innerHTML = poiListHtml;
+
+  // Roaming creature roster
+  const roam = GS.roaming || [];
+  if (roam.length) {
+    const bossCount = roam.filter(r => r.boss).length;
+    const rows = roam.map(r =>
+      `<tr class="${r.boss ? 'is-boss' : ''}">
+         <td style="white-space:nowrap"><span style="font-size:14px;margin-right:5px">${r.emoji}</span><b>${r.name}</b>${r.boss ? '<span class="boss-badge">BOSS</span>' : ''}</td>
+         <td>LVL ${r.lvl}</td>
+         <td><span class="quad-pill">${r.quad}</span></td>
+         <td style="text-align:right">${r.hp.toLocaleString()} HP</td>
+       </tr>`
+    ).join('');
+    document.getElementById('map-roaming-list').innerHTML =
+      `<div class="stitle">Creatures roaming</div>
+       <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">${roam.length} sighted · <span style="color:#a32d2d;font-weight:500">${bossCount} boss${bossCount!==1?'es':''}</span>. 🐾 marks a creature on the map · 💀 marks a boss.</p>
+       <table class="roam-tbl"><thead><tr><th>Creature</th><th>Level</th><th>Quadrant</th><th style="text-align:right">HP</th></tr></thead><tbody>${rows}</tbody></table>`;
+  } else {
+    document.getElementById('map-roaming-list').innerHTML = '';
+  }
 
   // Player colour key — one swatch per player, matching their square outline
   document.getElementById('map-player-key').innerHTML = GS.players.map(p =>
